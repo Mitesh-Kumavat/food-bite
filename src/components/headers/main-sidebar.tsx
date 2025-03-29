@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, PenSquare } from "lucide-react"
+import { BarChart3, ChefHat, ClipboardList, Home, Menu, Package, Settings, ShoppingCart, Trash2 } from "lucide-react"
 
 import {
     Sidebar,
@@ -37,14 +37,34 @@ export function MainSidebar() {
 
     const navItems = [
         {
-            title: "Home",
-            href: "/dashboard/",
+            title: "Dashboard",
+            href: "/dashboard",
             icon: Home,
         },
         {
-            title: "Other routes",
-            href: "/dashboard/other",
-            icon: PenSquare,
+            title: "Inventory",
+            href: "/dashboard/inventory",
+            icon: Package,
+        },
+        {
+            title: "Menu",
+            href: "/dashboard/menu",
+            icon: Menu,
+        },
+        {
+            title: "Sales",
+            href: "/dashboard/sales",
+            icon: ShoppingCart,
+        },
+        {
+            title: "Waste",
+            href: "/dashboard/waste",
+            icon: Trash2,
+        },
+        {
+            title: "Analytics",
+            href: "/dashboard/analytics",
+            icon: BarChart3,
         },
     ]
 
