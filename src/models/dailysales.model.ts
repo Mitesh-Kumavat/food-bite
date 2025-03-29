@@ -1,19 +1,35 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export interface IDailySale extends Document {
-  restaurant: mongoose.Types.ObjectId;
-  dish: mongoose.Types.ObjectId; // reference to Dish
-  quantitySold: number;
-  saleDate: Date;
+export interface IDishSold {
+  dish: mongoose.Types.ObjectId; // Reference to Dish
+  quantity: number; // Quantity sold for each dish
 }
 
-const dailySaleSchema = new Schema<IDailySale>({
-  restaurant: { type: Schema.Types.ObjectId, ref: "Restaurant", required: true },
+export interface IDailySale extends Document {
+  restaurant: mongoose.Types.ObjectId; // Reference to Restaurant
+  dishes: IDishSold[]; // Array of sold dishes
+  totalSales: number; // Total revenue for the sale
+  saleDate: Date; // Date of the sale
+}
+
+const dishSoldSchema = new Schema<IDishSold>({
   dish: { type: Schema.Types.ObjectId, ref: "Dish", required: true },
-  quantitySold: { type: Number, required: true },
-  saleDate: { type: Date, default: Date.now },
+  quantity: { type: Number, required: true },
 });
+
+const dailySaleSchema = new Schema<IDailySale>(
+  {
+    restaurant: { type: Schema.Types.ObjectId, ref: "Restaurant", required: true },
+    dishes: { type: [dishSoldSchema], required: true },
+    totalSales: { type: Number, required: true },
+    saleDate: { type: Date, default: Date.now },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 const DailySale =
   mongoose.models?.DailySale || mongoose.model<IDailySale>("DailySale", dailySaleSchema);
+
 export default DailySale;

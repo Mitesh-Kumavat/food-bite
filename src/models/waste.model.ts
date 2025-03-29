@@ -6,6 +6,7 @@ export interface IWaste extends Document {
   quantity: number;
   unit: string;
   reason: string;
+  description: string;
   date: Date;
 }
 
@@ -15,6 +16,7 @@ const wasteSchema = new Schema<IWaste>({
   quantity: { type: Number, required: true },
   unit: { type: String, required: true },
   reason: { type: String, required: true },
+  description: {type:String},
   date: { type: Date, default: Date.now },
 },
 {

@@ -5,6 +5,7 @@ export interface IInventory extends Document {
   itemName: string;
   quantity: number;
   unit: string;
+  category: string;
   purchasePrice: number;
   purchaseDate: Date;
   expiryDate: Date;
@@ -16,6 +17,7 @@ const inventorySchema = new Schema<IInventory>({
   itemName: { type: String, required: true },
   quantity: { type: Number, required: true },
   unit: { type: String, required: true },
+  category: {type: String, required: true},
   purchasePrice: { type: Number, required: true },
   purchaseDate: { type: Date, default: Date.now },
   expiryDate: { type: Date, required: true },

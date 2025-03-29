@@ -12,7 +12,12 @@ export interface IDish extends Document {
   name: string;
   ingredients: IIngredient[];
   price: number;
-  isEphemeral?: boolean;
+  activeOnMenu?: boolean;
+  category: string;
+  prepTime: number;
+  allergens: string[];
+  description: string;
+  isEphemeral: boolean;
   ephemeralExpiresAt?: Date; // if set, use a TTL index on this field
   createdAt?: Date;
 }
@@ -28,7 +33,11 @@ const dishSchema = new Schema<IDish>({
   name: { type: String, required: true },
   ingredients: { type: [ingredientSchema], required: true },
   price: { type: Number, required: true },
-  isEphemeral: { type: Boolean, default: false },
+  activeOnMenu: { type: Boolean, default: false },
+  category: {type:String, required: true},
+  prepTime: {type: Number, required: true},
+  allergens: {type: [String]},
+  isEphemeral: {type: Boolean, default: false},
   ephemeralExpiresAt: { type: Date },
 },
 {

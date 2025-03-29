@@ -6,6 +6,7 @@ import DailySale from "@/models/dailysales.model";
 import Inventory from "@/models/inventory .model";
 import ProfitLoss from "@/models/profitloss.model";
 import Waste from "@/models/waste.model";
+import HistoryDish from "@/models/historyDish.model";
 
 export const connectDB = async () => {
     if (mongoose.connections[0].readyState) {
