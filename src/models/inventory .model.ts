@@ -19,7 +19,7 @@ const inventorySchema = new Schema<IInventory>({
   purchasePrice: { type: Number, required: true },
   purchaseDate: { type: Date, default: Date.now },
   expiryDate: { type: Date, required: true },
-  enteredBy: { type: String, enum: ["chef", "manager"], required: true },
+  enteredBy: { type: String, default:"chef" },
 },
 {
     timestamps: true,
