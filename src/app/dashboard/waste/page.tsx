@@ -289,7 +289,7 @@ export default function WastePage() {
       </div>
 
       <Card>
-        <CardContent className="p-0">
+        <CardContent className="p-5 py-0">
           <Table>
             <TableHeader>
               <TableRow>
