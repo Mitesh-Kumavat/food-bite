@@ -3,6 +3,7 @@ import { connectDB } from "../../../../config/db";
 import { NextRequest, NextResponse } from "next/server";
 import User from "@/models/user.model";
 import { cookies } from 'next/headers'
+import Restaurant from "@/models/restaurant.model";
 
 export interface LoginRequest {
     email: string;
@@ -31,7 +32,6 @@ export async function POST(req: NextRequest) {
             const response = new ApiResponse("Invalid credentials", 401);
             return NextResponse.json(response, { status: 401 });
         }
-
         const token = await user.createAccessToken();
         const finalUser = {
             _id: user._id,
