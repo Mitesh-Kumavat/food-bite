@@ -1,4 +1,6 @@
-import { MessageSquare } from 'lucide-react'
+"use client"
+
+import { ChefHat } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 import { Button } from '@/components/ui/button'
@@ -9,13 +11,9 @@ const navLinks = [
         href: "#features",
     },
     {
-        title: "FAQ",
-        href: "#faq",
-    },
-    {
-        title: "About",
-        href: "#",
-    },
+        title: "How It Works",
+        href: "#how-it-works"
+    }
 ]
 
 const Header = () => {
@@ -24,8 +22,8 @@ const Header = () => {
             <div className="container flex h-16 items-center justify-between">
                 <Link href={"/"} className="flex items-center gap-2 font-bold text-xl">
                     {/* your platform logo */}
-                    <MessageSquare className="h-6 w-6" />
-                    <span>Your Platform</span>
+                    <ChefHat className="h-6 w-6" />
+                    <span>Foodbite</span>
                 </Link>
                 <nav className="hidden md:flex gap-6">
                     {navLinks.map((link) => (

@@ -1,7 +1,10 @@
 'use client'
-import { MessageSquare } from 'lucide-react'
+
+import { Facebook, Instagram, Linkedin, MessageSquare, Twitter } from 'lucide-react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
+import { Input } from '../ui/input'
+import { Button } from '../ui/button'
 
 const Footer = () => {
 
@@ -11,84 +14,97 @@ const Footer = () => {
     }, [])
 
     return (
-        <footer className="w-full mx-auto container border-t bg-background py-6 md:py-12">
-            <div className="container px-4 md:px-6">
-                <div className="grid gap-8 lg:grid-cols-4">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2 font-bold text-xl">
-                            <MessageSquare className="h-6 w-6" />
-                            <span>PostPlatform</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                            Share your thoughts with the world. Create, discover, and engage with content that matters to you.
-                        </p>
-                    </div>
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Platform</h3>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                    Features
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                    Pricing
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                    FAQ
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Company</h3>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                    About
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                    Blog
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                    Careers
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Legal</h3>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                    Privacy Policy
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                    Terms of Service
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="#" className="text-muted-foreground hover:text-foreground">
-                                    Cookie Policy
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-                    <p>&copy; {currentYear} Your Platform. All rights reserved.</p>
-                </div>
+        <footer className="border-t bg-background">
+        <div className="container px-4 md:px-6 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Foodbite</h3>
+              <p className="text-sm text-muted-foreground">
+                AI-powered kitchen management system to reduce waste and save money.
+              </p>
+              <div className="flex space-x-4">
+                <a href="#" className="text-muted-foreground hover:text-foreground">
+                  <Twitter className="h-5 w-5" />
+                  <span className="sr-only">Twitter</span>
+                </a>
+                <a href="#" className="text-muted-foreground hover:text-foreground">
+                  <Facebook className="h-5 w-5" />
+                  <span className="sr-only">Facebook</span>
+                </a>
+                <a href="#" className="text-muted-foreground hover:text-foreground">
+                  <Instagram className="h-5 w-5" />
+                  <span className="sr-only">Instagram</span>
+                </a>
+                <a href="#" className="text-muted-foreground hover:text-foreground">
+                  <Linkedin className="h-5 w-5" />
+                  <span className="sr-only">LinkedIn</span>
+                </a>
+              </div>
             </div>
-        </footer>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Product</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <a href="#" className="text-muted-foreground hover:text-foreground">
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-muted-foreground hover:text-foreground">
+                    Pricing
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-muted-foreground hover:text-foreground">
+                    Case Studies
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-muted-foreground hover:text-foreground">
+                    Testimonials
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Company</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <a href="#" className="text-muted-foreground hover:text-foreground">
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-muted-foreground hover:text-foreground">
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-muted-foreground hover:text-foreground">
+                    Careers
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-muted-foreground hover:text-foreground">
+                    Contact
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Subscribe to our newsletter</h3>
+              <p className="text-sm text-muted-foreground">Get the latest updates and news delivered to your inbox.</p>
+              <div className="flex space-x-2">
+                <Input type="email" placeholder="Enter your email" className="max-w-[220px]" />
+                <Button variant="outline">Subscribe</Button>
+              </div>
+            </div>
+          </div>
+          <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
+            <p>© {new Date().getFullYear()} Foodbite. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     )
 }
 
