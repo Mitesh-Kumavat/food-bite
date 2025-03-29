@@ -1,9 +1,10 @@
 import Hero from "@/components/_landing/hero"
 import FeaturesSection from "@/components/_landing/feature-section"
-import FaqSection from "@/components/_landing/faq"
 import Cta from "@/components/_landing/cta"
 import Footer from "@/components/_landing/footer"
 import Header from "@/components/_landing/header"
+import AiInsightsSection from "@/components/_landing/aiInsightsSection"
+import HowItWorks from "@/components/_landing/how-it-works"
 
 export default function Home() {
   return (
@@ -12,7 +13,8 @@ export default function Home() {
       <main className="container mx-auto md:px-8">
         <Hero />
         <FeaturesSection />
-        <FaqSection />
+        <AiInsightsSection/>
+        <HowItWorks/>
         <Cta />
       </main>
       <Footer />
