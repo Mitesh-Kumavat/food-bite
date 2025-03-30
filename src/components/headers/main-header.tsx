@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "../theme-toggler";
@@ -15,6 +15,7 @@ import {
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { UserCircle2, LogOut, Mail } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface User {
     restaurantName: string;
@@ -24,24 +25,26 @@ interface User {
 
 const Header = () => {
     const router = useRouter();
-    const [user, setUser] = React.useState<User>();
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const response = await axios.get("/api/me");
-                console.log(response.data);
-                if (response.status !== 200) {
+                if (response.status === 200) {
+                    setUser(response.data.data);
+                } else {
                     console.error("Error fetching user data:", response.data.message);
-                    return;
                 }
-                setUser(response.data.data);
             } catch (error) {
                 console.error("Error fetching user data:", error);
+            } finally {
+                setLoading(false);
             }
-        }
-        fetchUserData();
+        };
 
+        fetchUserData();
     }, []);
 
     const handleLogout = async () => {
@@ -56,8 +59,6 @@ const Header = () => {
         }
     };
 
-
-
     return (
         <header className="flex h-14 items-center gap-4 border-b px-4">
             <SidebarTrigger />
@@ -66,20 +67,25 @@ const Header = () => {
                 <div className="flex items-center gap-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant={"outline"}>{user?.userName}</Button>
+                            {loading ? (
+                                // Loading Skeleton
+                                <Skeleton className="h-10 w-28 rounded-md" />
+                            ) : (
+                                <Button variant="outline">{user?.userName || "Unknown"}</Button>
+                            )}
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-60 shadow-lg">
                             <DropdownMenuLabel className="text-base font-semibold">
-                                {user?.restaurantName || "Restaurant Name"}
+                                {user?.restaurantName || "Unknown Restaurant"}
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="flex items-center gap-2">
                                 <UserCircle2 className="h-4 w-4 text-muted-foreground" />
-                                <span>{user?.userName}</span>
+                                <span>{user?.userName || "Unknown"}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem className="flex items-center gap-2">
                                 <Mail className="h-4 w-4 text-muted-foreground" />
-                                <span>{user?.email}</span>
+                                <span>{user?.email || "No Email"}</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -92,7 +98,6 @@ const Header = () => {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* Theme Toggle */}
                     <ModeToggle />
                 </div>
             </div>

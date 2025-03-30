@@ -1,4 +1,5 @@
 import { connectDB } from "@/config/db"
+import Restaurant from "@/models/restaurant.model";
 import User from "@/models/user.model";
 import ApiResponse from "@/utils/ApiResponse";
 import { NextRequest, NextResponse } from "next/server";
@@ -18,12 +19,18 @@ export async function GET(req: NextRequest) {
 
 
         const user = await User.findById(userId).select("-password -accessToken");
+        const restaurantName = await Restaurant.find({ owner: user._id }).select("name");
         if (!user) {
             const response = new ApiResponse("User not found", 404);
             return NextResponse.json(response, { status: 404 });
         }
+        const finalUser = {
+            ...user._doc,
+            restaurantName: restaurantName[0]?.name || null,
+        }
+        const response = new ApiResponse("User found", 200, finalUser);
+        console.log(response);
 
-        const response = new ApiResponse("User found", 200, user);
         return NextResponse.json(response, { status: 200 });
     } catch (error) {
         console.log("ERROR IN POST REQUEST OF USER: ", error);
