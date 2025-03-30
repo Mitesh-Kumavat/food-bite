@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { MessageSquare } from "lucide-react"
+import { ChefHat } from "lucide-react"
 import axios from "axios"
 import { toast } from "sonner"
 
@@ -19,6 +19,8 @@ export default function SignupPage() {
         userName: "",
         email: "",
         password: "",
+        restaurantName: "",
+        restaurantAddress: "",
     })
     const [error, setError] = useState("");
 
@@ -53,8 +55,8 @@ export default function SignupPage() {
         <div className="flex min-h-screen flex-col items-center justify-center bg-muted/50 px-4">
             <Link href="/" className="absolute left-8 top-8 flex items-center gap-2 font-bold text-xl">
                 {/* Your Platform logo */}
-                <MessageSquare className="h-6 w-6" />
-                <span>Your Platform Name</span>
+                <ChefHat className="h-6 w-6" />
+                <span>Foodbit</span>
             </Link>
 
             <Card className="w-full max-w-md">
@@ -64,31 +66,33 @@ export default function SignupPage() {
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="username">Username</Label>
-                            <Input
-                                id="userName"
-                                name="userName"
-                                type="text"
-                                placeholder="john_doe"
-                                required
-                                value={formData.userName}
-                                onChange={handleChange}
-                            />
+                        <div className="flex gap-4 w-full">
+                            <div className="space-y-2">
+                                <Label htmlFor="username">Username</Label>
+                                <Input
+                                    id="userName"
+                                    name="userName"
+                                    type="text"
+                                    placeholder="johndoe"
+                                    required
+                                    value={formData.userName}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    placeholder="name@example.com"
+                                    required
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                type="email"
-                                placeholder="name@example.com"
-                                required
-                                value={formData.email}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div className="space-y-2 mb-2">
+                        <div className="space-y-2 ">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
                             </div>
@@ -99,6 +103,34 @@ export default function SignupPage() {
                                 placeholder="********"
                                 required
                                 value={formData.password}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="space-y-2 ">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="restaurantName">Restaurant Name</Label>
+                            </div>
+                            <Input
+                                id="restaurantName"
+                                name="restaurantName"
+                                type="text"
+                                placeholder="Your Restaurant Name"
+                                required
+                                value={formData.restaurantName}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="space-y-2 mb-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="restaurantAddress ">Restaurant Address</Label>
+                            </div>
+                            <Input
+                                id="restaurantAddress"
+                                name="restaurantAddress"
+                                type="text"
+                                placeholder="Your Restaurant Address"
+                                required
+                                value={formData.restaurantAddress}
                                 onChange={handleChange}
                             />
                         </div>

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { MessageSquare } from "lucide-react"
+import { ChefHat } from "lucide-react"
 import axios from "axios"
 import { toast } from "sonner"
 
@@ -55,8 +55,8 @@ export default function LoginPage() {
         <div className="flex min-h-screen flex-col items-center justify-center bg-muted/50 px-4">
             <Link href="/" className="absolute left-8 top-8 flex items-center gap-2 font-bold text-xl">
                 {/* your platform logo */}
-                <MessageSquare className="h-6 w-6" />
-                <span>Your Platform Name</span>
+                <ChefHat className="h-6 w-6" />
+                <span>Foodbite</span>
             </Link>
 
             <Card className="w-full max-w-md">
