@@ -54,8 +54,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const payload = await verifyAuth(req);
-    const { quantity, reason, description, inventoryItemId } =
-      await req.json();
+    const { quantity, reason, description, inventoryItemId } = await req.json();
 
     // Get the restaurant associated with the logged-in user
     const restaurant = await Restaurant.findOne({ owner: payload._id });
