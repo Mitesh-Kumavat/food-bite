@@ -1,7 +1,6 @@
 "use client"
 
-import { XAxis, YAxis, Line, ResponsiveContainer } from "recharts"
-import { CartesianGrid, Tooltip, LineChart } from "recharts"
+import { XAxis, YAxis, Line, ResponsiveContainer, CartesianGrid, Tooltip, LineChart } from "recharts"
 
 interface SalesChartProps {
     data: {
@@ -13,7 +12,7 @@ interface SalesChartProps {
 export function SalesChart({ data }: SalesChartProps) {
     return (
         <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data}>
+            <LineChart data={data} >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                     dataKey="date"
@@ -33,7 +32,7 @@ export function SalesChart({ data }: SalesChartProps) {
                     formatter={(value: number, name: string, props: any) => [`$${value}`, "Sales"]}
                     labelFormatter={(label: string) => `Date: ${label}`}
                 />
-                <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="amount" stroke="#00C951" strokeWidth={2} activeDot={{ r: 6 }} />
             </LineChart>
         </ResponsiveContainer>
     )

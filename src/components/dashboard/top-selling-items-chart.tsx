@@ -43,7 +43,7 @@ export function TopSellingItemsChart({ data }: TopSellingItemsChartProps) {
             return null
           }}
         />
-        <Bar dataKey="quantity" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="quantity" fill="#00C951" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )

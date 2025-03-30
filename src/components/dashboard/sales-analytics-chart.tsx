@@ -53,7 +53,7 @@ export function SalesAnalyticsChart({ data }: SalesAnalyticsChartProps) {
           type="monotone"
           dataKey="revenue"
           stroke="hsl(var(--primary))"
-          fill="hsl(var(--primary)/0.2)"
+          fill="#2662D9"
           strokeWidth={2}
         />
       </AreaChart>
