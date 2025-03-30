@@ -7,7 +7,7 @@ import Inventory from '@/models/inventory .model';
 // Update inventory item
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -22,8 +22,10 @@ export async function PUT(
       );
     }
 
+    const { id } = await params;
+
     const inventory = await Inventory.findOneAndUpdate(
-      { _id: params.id, restaurant: restaurant._id },
+      { _id: id, restaurant: restaurant._id },
       { itemName, quantity, unit, purchasePrice, expiryDate },
       { new: true }
     );
@@ -48,9 +50,10 @@ export async function PUT(
 // Delete inventory item
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
     const payload = await verifyAuth(req);
 
@@ -63,7 +66,7 @@ export async function DELETE(
     }
 
     const inventory = await Inventory.findOneAndDelete({
-      _id: params.id,
+      _id: id,
       restaurant: restaurant._id
     });
 
@@ -77,7 +80,7 @@ export async function DELETE(
     // Remove inventory reference from restaurant
     await Restaurant.findByIdAndUpdate(
       restaurant._id,
-      { $pull: { inventory: params.id } }
+      { $pull: { inventory: id } }
     );
 
     return NextResponse.json(

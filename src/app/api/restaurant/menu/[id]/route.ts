@@ -7,9 +7,10 @@ import Dish from "@/models/dish.model";
 // Update menu item
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
     const payload = await verifyAuth(req);
     const {
@@ -35,7 +36,7 @@ export async function PUT(
 
     // Update menu item with new fields
     const menuItem = await Dish.findOneAndUpdate(
-      { _id: params.id, restaurant: restaurant._id },
+      { _id: id, restaurant: restaurant._id },
       {
         name,
         ingredients,
@@ -70,9 +71,10 @@ export async function PUT(
 // Delete menu item
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
     const payload = await verifyAuth(req);
 
@@ -87,7 +89,7 @@ export async function DELETE(
 
     // Find and delete the dish
     const menuItem = await Dish.findOneAndDelete({
-      _id: params.id,
+      _id: id,
       restaurant: restaurant._id,
     });
 
@@ -100,7 +102,7 @@ export async function DELETE(
 
     // Remove dish reference from the restaurant's menu
     await Restaurant.findByIdAndUpdate(restaurant._id, {
-      $pull: { menu: params.id },
+      $pull: { menu: id },
     });
 
     return NextResponse.json(
