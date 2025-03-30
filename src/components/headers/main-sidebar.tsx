@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, ChefHat, ClipboardList, Home, Menu, Package, Settings, ShoppingCart, Trash2 } from "lucide-react"
+import { BarChart3, ChefHat, Home, Menu, Package, ShoppingCart, Trash2 } from "lucide-react"
 
 import {
     Sidebar,
@@ -73,7 +73,10 @@ export function MainSidebar() {
         <Sidebar>
             <SidebarHeader className="border-b">
                 <div className="p-2 pb-1">
-                    <h2 className="text-xl font-bold">Your App Name</h2>
+                    <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl">
+                        <ChefHat className="h-6 w-6" />
+                        <span>Foodbite</span>
+                    </Link>
                 </div>
             </SidebarHeader>
             <SidebarContent>
