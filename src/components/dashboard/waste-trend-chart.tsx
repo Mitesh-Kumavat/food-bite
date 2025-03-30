@@ -69,7 +69,7 @@ export function WasteTrendChart({ data }: WasteTrendChartProps) {
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[0.70rem] uppercase text-muted-foreground">Cost</span>
-                      <span className="font-bold">${payload[0].value}</span>
+                      <span className="font-bold">₹${payload[0].value}</span>
                     </div>
                   </div>
                 </div>

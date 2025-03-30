@@ -10,14 +10,16 @@ interface WasteByReasonChartProps {
 }
 
 export function WasteByReasonChart({ data }: WasteByReasonChartProps) {
-  // Generate colors based on the primary color with different opacities
   const COLORS = [
-    "hsl(var(--primary))",
-    "hsl(var(--primary)/0.8)",
-    "hsl(var(--primary)/0.6)",
-    "hsl(var(--primary)/0.4)",
-    "hsl(var(--primary)/0.2)",
+    "#F97316",
+    "#EF4444",
+    "#3B82F6",
+    "#EC4899",
+    "#8B5CF6",
+    "#EAB308",
+    "#D946EF",
   ]
+
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -47,7 +49,7 @@ export function WasteByReasonChart({ data }: WasteByReasonChartProps) {
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[0.70rem] uppercase text-muted-foreground">Cost</span>
-                      <span className="font-bold">${payload[0].value}</span>
+                      <span className="font-bold">₹{payload[0].value}</span>
                     </div>
                   </div>
                 </div>

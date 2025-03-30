@@ -8,6 +8,7 @@ import { InventoryStatusChart } from "@/components/dashboard/inventory-status-ch
 import { mockDashboardData } from "@/lib/mock-data"
 import { toast } from "sonner"
 import axios from "axios"
+import DashboardSkeleton from "@/components/dashboard/skeleton"
 
 export default function HomePage() {
 
@@ -16,10 +17,9 @@ export default function HomePage() {
 
     useEffect(() => {
         const fetchData = async () => {
-            setIsLoading(true)
             try {
+                setIsLoading(true)
                 const token = localStorage.getItem("token");
-
                 const data = await axios.get("/api/restaurant/dashboard", {
                     headers: {
                         "Content-Type": "application/json",
@@ -33,8 +33,6 @@ export default function HomePage() {
             } finally {
                 setIsLoading(false)
             }
-            // setData(mockDashboardData)
-            setIsLoading(false)
         }
 
         fetchData()
@@ -43,85 +41,89 @@ export default function HomePage() {
     return (
         <div className="space-y-6">
             <h2 className="text-xl font-bold">Dashboard</h2>
-            <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">₹{data.totalRevenue.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">
-                                from today's sell
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Inventory Value</CardTitle>
-                            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">₹{data.inventoryValue.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">{data.inventoryItems} items in stock</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Menu Items Sold</CardTitle>
-                            <Utensils className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{data.menuItemsSold}</div>
-                            <p className="text-xs text-muted-foreground">
-                                from today's sell
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Profit/Loss</CardTitle>
-                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className={`text-2xl font-bold ${data.profitLoss > 0 ? "text-green-500" : "text-red-500"}`}>
-                                ₹{data.profitLoss}
-                            </div>
-                            <p className="text-xs text-muted-foreground">from today's sell</p>
-                        </CardContent>
-                    </Card>
-                </div>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                    <Card className="col-span-8">
-                        <CardHeader>
-                            <CardTitle>Sales Overview</CardTitle>
-                            <CardDescription>Daily sales for the current month</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pl-2">
-                            <SalesChart data={data.salesData} />
-                        </CardContent>
-                    </Card>
-                </div>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                    <Card className="col-span-4">
-                        <CardHeader>
-                            <CardTitle>Inventory Status</CardTitle>
-                            <CardDescription>Current inventory by category</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pl-2">
-                            <InventoryStatusChart data={data.inventoryStatus} />
-                        </CardContent>
-                    </Card>
-                    <Card className="col-span-3">
-                        <CardHeader>
-                            <CardTitle>Alerts</CardTitle>
-                            <CardDescription>Items requiring attention</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                {/* generate dummy data here */}
-                                {/* {data.alerts.map((alert, i) => (
+
+            {isLoading && <DashboardSkeleton />}
+
+            {!isLoading && (
+                <div className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">₹{data.totalRevenue.toLocaleString()}</div>
+                                <p className="text-xs text-muted-foreground">
+                                    from today's sell
+                                </p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Inventory Value</CardTitle>
+                                <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">₹{data.inventoryValue.toLocaleString()}</div>
+                                <p className="text-xs text-muted-foreground">{data.inventoryItems} items in stock</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Menu Items Sold</CardTitle>
+                                <Utensils className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{data.menuItemsSold}</div>
+                                <p className="text-xs text-muted-foreground">
+                                    from today's sell
+                                </p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Profit/Loss</CardTitle>
+                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className={`text-2xl font-bold ${data.profitLoss > 0 ? "text-green-500" : "text-red-500"}`}>
+                                    ₹{data.profitLoss}
+                                </div>
+                                <p className="text-xs text-muted-foreground">from today's sell</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                        <Card className="col-span-8">
+                            <CardHeader>
+                                <CardTitle>Sales Overview</CardTitle>
+                                <CardDescription>Daily sales for the current month</CardDescription>
+                            </CardHeader>
+                            <CardContent className="pl-2">
+                                <SalesChart data={data.salesData} />
+                            </CardContent>
+                        </Card>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                        <Card className="col-span-4">
+                            <CardHeader>
+                                <CardTitle>Inventory Status</CardTitle>
+                                <CardDescription>Current inventory by category</CardDescription>
+                            </CardHeader>
+                            <CardContent className="pl-2">
+                                <InventoryStatusChart data={data.inventoryStatus} />
+                            </CardContent>
+                        </Card>
+                        <Card className="col-span-3">
+                            <CardHeader>
+                                <CardTitle>Alerts</CardTitle>
+                                <CardDescription>Items requiring attention</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    {/* generate dummy data here */}
+                                    {/* {data.alerts.map((alert, i) => (
                                     <div key={i} className="flex items-start gap-4 rounded-md border p-4">
                                         <AlertTriangle
                                             className={`mt-0.5 h-5 w-5 ${alert.type === "warning" ? "text-amber-500" : "text-red-500"}`}
@@ -132,11 +134,12 @@ export default function HomePage() {
                                         </div>
                                     </div>
                                 ))} */}
-                            </div>
-                        </CardContent>
-                    </Card>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

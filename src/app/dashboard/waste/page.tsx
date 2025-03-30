@@ -11,11 +11,11 @@ import { Search, Plus, Filter, Trash2, AlertTriangle } from "lucide-react"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { mockInventoryData, mockWasteData } from "@/lib/mock-data"
 import { toast } from "sonner"
 import { WasteByReasonChart } from "@/components/dashboard/waste-by-reason-chart"
 import { WasteTrendChart } from "@/components/dashboard/waste-trend-chart"
 import axios from "axios"
+import DashboardSkeleton from "@/components/dashboard/skeleton"
 
 interface WasteRecord {
   _id: string,
@@ -56,20 +56,20 @@ export default function WastePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true)
         const data = await axios.get("/api/restaurant/waste", {
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${localStorage.getItem("token")}`,
           }
         });
-        setWaste(data.data)
-
         const inventoryData = await axios.get("/api/restaurant/inventory", {
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${localStorage.getItem("token")}`,
           }
         });
+        setWaste(data.data)
         setInventory(inventoryData.data)
       } catch (error) {
         console.log("Error fetching data:", error);
@@ -100,10 +100,8 @@ export default function WastePage() {
   }
 
   const addWaste = async () => {
-    console.log("Adding waste:", newWaste);
-
     if (!newWaste.inventoryItemId || !newWaste.quantity || !newWaste.reason) {
-      toast("Error", {
+      toast.error("Error", {
         description: "Please fill in all required fields",
       })
       return
@@ -111,7 +109,6 @@ export default function WastePage() {
 
     try {
       const item = inventory?.find((item) => item._id === newWaste.inventoryItemId)
-
       if (!item) {
         throw new Error("Inventory item not found")
       }
@@ -127,8 +124,9 @@ export default function WastePage() {
           "Authorization": `Bearer ${localStorage.getItem("token")}`,
         }
       });
-      console.log("Waste added:", data.data)
-
+      if (data.status !== 200) {
+        throw new Error("Failed to record waste")
+      }
       const wasteRecord = {
         _id: `waste-${Date.now()}`,
         date: Date.now(),
@@ -152,11 +150,11 @@ export default function WastePage() {
         description: "",
       })
 
-      toast("Waste recorded", {
+      toast.success("Waste recorded", {
         description: `${wasteRecord.quantity} ${wasteRecord.unit} of ${wasteRecord.itemName} recorded as waste.`,
       })
     } catch (error) {
-      toast("Error", {
+      toast.error("Error", {
         description: "Failed to record waste. Please try again.",
       })
     }
@@ -191,158 +189,162 @@ export default function WastePage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {isLoading && <DashboardSkeleton />}
+
+      {!isLoading && (<>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Waste Cost</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">₹{totalWasteCost.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground">From {totalWasteItems} waste records</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Waste by Reason</CardTitle>
+              <CardDescription>Cost breakdown by waste reason</CardDescription>
+            </CardHeader>
+            <CardContent className="h-[300px]">
+              <WasteByReasonChart data={wasteByReasonData} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Waste Trend</CardTitle>
+              <CardDescription>Daily waste cost for the last 7 days</CardDescription>
+            </CardHeader>
+            <CardContent className="h-[300px]">
+              <WasteTrendChart data={waste} />
+            </CardContent>
+          </Card>
+        </div>
+
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Waste Cost</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle>Record Waste</CardTitle>
+            <CardDescription>Document wasted items to track and reduce waste</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{totalWasteCost.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">From {totalWasteItems} waste records</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Waste by Reason</CardTitle>
-            <CardDescription>Cost breakdown by waste reason</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <WasteByReasonChart data={wasteByReasonData} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Waste Trend</CardTitle>
-            <CardDescription>Daily waste cost for the last 7 days</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <WasteTrendChart data={waste} />
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Record Waste</CardTitle>
-          <CardDescription>Document wasted items to track and reduce waste</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <DatePicker
-                date={selectedDate}
-                setDate={(date) => setSelectedDate(date || new Date())}
-              />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <DatePicker
+                  date={selectedDate}
+                  setDate={(date) => setSelectedDate(date || new Date())}
+                />
+              </div>
+              <div>
+                <Select name="inventoryItemId" value={newWaste.inventoryItemId} onValueChange={handleItemChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select inventory item" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {inventory?.map((item) => (
+                      <SelectItem key={item._id} value={item._id}>
+                        {item.itemName}({item.quantity} {item.unit})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Input
+                  name="quantity"
+                  type="number"
+                  min="1"
+                  placeholder="Quantity"
+                  value={newWaste.quantity}
+                  onChange={handleNewWasteChange}
+                />
+              </div>
+              <div>
+                <Select value={newWaste.reason} onValueChange={handleReasonChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select reason" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="expired">Expired</SelectItem>
+                    <SelectItem value="spoiled">Spoiled</SelectItem>
+                    <SelectItem value="overproduction">Overproduction</SelectItem>
+                    <SelectItem value="preparation">Preparation Waste</SelectItem>
+                    <SelectItem value="customer-return">Customer Return</SelectItem>
+                    <SelectItem value="damaged">Damaged</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Select name="inventoryItemId" value={newWaste.inventoryItemId} onValueChange={handleItemChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select inventory item" />
-                </SelectTrigger>
-                <SelectContent>
-                  {inventory?.map((item) => (
-                    <SelectItem key={item._id} value={item._id}>
-                      {item.itemName}({item.quantity} {item.unit})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Input
-                name="quantity"
-                type="number"
-                min="1"
-                placeholder="Quantity"
-                value={newWaste.quantity}
+            <div className="mt-4">
+              <Textarea
+                name="description"
+                placeholder="Additional notes about this waste..."
+                value={newWaste.description}
                 onChange={handleNewWasteChange}
+                className="min-h-[80px]"
               />
             </div>
-            <div>
-              <Select value={newWaste.reason} onValueChange={handleReasonChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select reason" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="expired">Expired</SelectItem>
-                  <SelectItem value="spoiled">Spoiled</SelectItem>
-                  <SelectItem value="overproduction">Overproduction</SelectItem>
-                  <SelectItem value="preparation">Preparation Waste</SelectItem>
-                  <SelectItem value="customer-return">Customer Return</SelectItem>
-                  <SelectItem value="damaged">Damaged</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="mt-4">
+              <Button onClick={addWaste}>
+                <Plus className="mr-2 h-4 w-4" />
+                Record Waste
+              </Button>
             </div>
-          </div>
-          <div className="mt-4">
-            <Textarea
-              name="description"
-              placeholder="Additional notes about this waste..."
-              value={newWaste.description}
-              onChange={handleNewWasteChange}
-              className="min-h-[80px]"
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search waste records..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="mt-4">
-            <Button onClick={addWaste}>
-              <Plus className="mr-2 h-4 w-4" />
-              Record Waste
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search waste records..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          <Button variant="outline" size="icon">
+            <Filter className="h-4 w-4" />
+            <span className="sr-only">Filter</span>
+          </Button>
         </div>
-        <Button variant="outline" size="icon">
-          <Filter className="h-4 w-4" />
-          <span className="sr-only">Filter</span>
-        </Button>
-      </div>
 
-      <Card>
-        <CardContent className="p-5 py-0">
-          <Table>
-            <TableHeader>
-              <TableRow >
-                <TableHead>Date</TableHead>
-                <TableHead>Item</TableHead>
-                <TableHead className="">Quantity</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead className="text-right">Cost</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredWaste.map((item) => (
-                <TableRow key={item._id}>
-                  <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
-                  <TableCell className="font-medium">{item.itemName}</TableCell>
-                  <TableCell className="">
-                    {item.quantity} {item.unit}
-                  </TableCell>
-                  <TableCell>{item.reason}</TableCell>
-                  <TableCell className="text-right">₹{item.cost.toFixed(2)}</TableCell>
-
+        <Card>
+          <CardContent className="p-5 py-0">
+            <Table>
+              <TableHeader>
+                <TableRow >
+                  <TableHead>Date</TableHead>
+                  <TableHead>Item</TableHead>
+                  <TableHead className="">Quantity</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead className="text-right">Cost</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {filteredWaste.map((item) => (
+                  <TableRow key={item._id}>
+                    <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
+                    <TableCell className="font-medium">{item.itemName}</TableCell>
+                    <TableCell className="">
+                      {item.quantity} {item.unit}
+                    </TableCell>
+                    <TableCell>{item.reason}</TableCell>
+                    <TableCell className="text-right">₹{item.cost.toFixed(2)}</TableCell>
+
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </>)}
     </div>
   )
 }

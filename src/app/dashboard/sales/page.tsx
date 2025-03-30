@@ -10,6 +10,7 @@ import { DatePicker } from "@/components/ui/date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import axios from "axios"
 import { toast } from "sonner"
+import DashboardSkeleton from "@/components/dashboard/skeleton"
 
 // **Types**
 interface Dish {
@@ -57,7 +58,6 @@ export default function SalesPage() {
             })
             setSales(response.data)
         } catch (error) {
-            console.error(error)
             toast.error("Failed to fetch sales data", {
                 description: "Please try again later.",
             })
@@ -68,6 +68,7 @@ export default function SalesPage() {
 
     const fetchMenuItems = async () => {
         try {
+            setIsLoading(true)
             const token = localStorage.getItem("token")
             const response = await axios.get<Dish[]>("/api/restaurant/menu", {
                 headers: {
@@ -77,10 +78,11 @@ export default function SalesPage() {
             })
             setMenuItems(response.data)
         } catch (error) {
-            console.error(error)
             toast.error("Failed to fetch menu items", {
                 description: "Please try again later.",
             })
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -175,90 +177,96 @@ export default function SalesPage() {
                 </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader >
-                        <div className="flex justify-between">
-                            <CardTitle>Total Sales</CardTitle>
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">₹{totalSales.toFixed(2)}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Items Sold</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{totalItems}</div>
-                    </CardContent>
-                </Card>
-            </div>
+            {isLoading && <DashboardSkeleton />}
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Record New Sale</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        <div className="md:col-span-8">
-                            <Select value={newSale.menuItemId} onValueChange={handleMenuItemChange}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select menu item" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {menuItems.map((item) => (
-                                        <SelectItem key={item._id} value={item._id}>
-                                            {item.name} (₹{item.price.toFixed(2)})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="md:col-span-2">
-                            <Input name="quantity" type="number" min="1" value={newSale.quantity} onChange={handleNewSaleChange} />
-                        </div>
-                        <div className="md:col-span-2">
-                            <Button onClick={addSale}>
-                                <Plus className="mr-2 h-4 w-4" /> Add Sale
-                            </Button>
-                        </div>
+            {!isLoading && (
+                <>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        <Card>
+                            <CardHeader >
+                                <div className="flex justify-between">
+                                    <CardTitle>Total Sales</CardTitle>
+                                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">₹{totalSales.toFixed(2)}</div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Items Sold</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{totalItems}</div>
+                            </CardContent>
+                        </Card>
                     </div>
-                </CardContent>
-            </Card>
 
-            <Card>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Item</TableHead>
-                                <TableHead>Quantity</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredSales.map((sale) => (
-                                <TableRow key={sale._id}>
-                                    <TableCell>{new Date(sale.saleDate).toLocaleDateString()}</TableCell>
-                                    <TableCell>{sale.dishes[0].dish.name}</TableCell>
-                                    <TableCell>{sale.dishes[0].quantity}</TableCell>
-                                    <TableCell>${sale.totalSales.toFixed(2)}</TableCell>
-                                    <TableCell>
-                                        <Button variant="ghost" size="icon" onClick={() => deleteSale(sale._id)}>
-                                            <Trash2 className="h-4 w-4 text-red-500" />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Record New Sale</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <div className="md:col-span-8">
+                                    <Select value={newSale.menuItemId} onValueChange={handleMenuItemChange}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select menu item" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {menuItems.map((item) => (
+                                                <SelectItem key={item._id} value={item._id}>
+                                                    {item.name} (₹ {item.price.toFixed(2)})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <Input name="quantity" type="number" min="1" value={newSale.quantity} onChange={handleNewSaleChange} />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <Button onClick={addSale}>
+                                        <Plus className="mr-2 h-4 w-4" /> Add Sale
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Item</TableHead>
+                                        <TableHead>Quantity</TableHead>
+                                        <TableHead>Total</TableHead>
+                                        <TableHead>Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredSales.map((sale) => (
+                                        <TableRow key={sale._id}>
+                                            <TableCell>{new Date(sale.saleDate).toLocaleDateString()}</TableCell>
+                                            <TableCell>{sale.dishes[0].dish.name}</TableCell>
+                                            <TableCell>{sale.dishes[0].quantity}</TableCell>
+                                            <TableCell>${sale.totalSales.toFixed(2)}</TableCell>
+                                            <TableCell>
+                                                <Button variant="ghost" size="icon" onClick={() => deleteSale(sale._id)}>
+                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </>
+            )}
         </div>
     )
 }

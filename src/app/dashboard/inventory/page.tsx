@@ -10,6 +10,7 @@ import { Search, Plus, Filter, AlertTriangle, Trash } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 import axios from "axios"
+import DashboardSkeleton from "@/components/dashboard/skeleton"
 
 interface InventoryItem {
     _id: string,
@@ -29,6 +30,7 @@ export default function InventoryPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setIsLoading(true)
                 const token = localStorage.getItem("token")
                 const response = await axios.get("/api/restaurant/inventory", {
                     headers: {
@@ -38,7 +40,6 @@ export default function InventoryPage() {
                 })
 
                 const data = response.data;
-                console.log(data, "DATA")
                 setInventory(data)
             } catch (error) {
                 console.log(error);
@@ -48,8 +49,6 @@ export default function InventoryPage() {
             } finally {
                 setIsLoading(false)
             }
-            // setInventory(mockInventoryData)
-            setIsLoading(false)
         }
 
         fetchData()
@@ -138,119 +137,125 @@ export default function InventoryPage() {
                 </Link>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Items</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{inventory.length}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {inventory.filter((item) => item.quantity <= 5).length}
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Expiring Soon</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {inventory.filter((item) => new Date(item.expiryDate) >= new Date()).length}
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Expired Items</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-red-500">
-                            {inventory.filter((item) => {
-                                const daysUntilExpiry = Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                                return daysUntilExpiry <= 0;
-                            }).length}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            {isLoading && (
+                <DashboardSkeleton />
+            )}
 
-            <div className="flex items-center gap-4">
-                <div className="relative flex-1">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        type="search"
-                        placeholder="Search inventory..."
-                        className="pl-8"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+            {!isLoading && (<>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{inventory.length}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {inventory.filter((item) => item.quantity <= 5).length}
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Expiring Soon</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {inventory.filter((item) => new Date(item.expiryDate) >= new Date()).length}
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Expired Items</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-red-500">
+                                {inventory.filter((item) => {
+                                    const daysUntilExpiry = Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                                    return daysUntilExpiry <= 0;
+                                }).length}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
-                <Button variant="outline" size="icon">
-                    <Filter className="h-4 w-4" />
-                    <span className="sr-only">Filter</span>
-                </Button>
-            </div>
 
-            <Card>
-                <CardContent className="p-4 py-0">
-                    <Table >
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Category</TableHead>
-                                <TableHead className="text-right">Quantity</TableHead>
-                                <TableHead className="text-right">Unit Price</TableHead>
-                                <TableHead>Expiry Status</TableHead>
-                                <TableHead>Stock Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredInventory.map((item) => (
-                                <TableRow key={item._id}>
-                                    <TableCell className="font-medium">{item.itemName}</TableCell>
-                                    <TableCell>{item.category}</TableCell>
-                                    <TableCell className="text-right">
-                                        {item.quantity} {item.unit}
-                                    </TableCell>
-                                    <TableCell className="text-right">${item.purchasePrice.toFixed(2)}</TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            {getStatusBadge(
-                                                Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-                                            )}
-                                            {(() => {
-                                                const daysUntilExpiry = Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                                                return daysUntilExpiry <= 3 && daysUntilExpiry > 0 ? (
-                                                    <AlertTriangle className="h-4 w-4 text-amber-500" />
-                                                ) : null;
-                                            })()}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{getStockBadge(item.quantity, 5)}</TableCell>
-                                    <TableCell className="text-right">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleDelete(item._id)}
-                                        >
-                                            <Trash className="h-2 w-2" />
-                                        </Button>
-                                    </TableCell>
+                <div className="flex items-center gap-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder="Search inventory..."
+                            className="pl-8"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <Button variant="outline" size="icon">
+                        <Filter className="h-4 w-4" />
+                        <span className="sr-only">Filter</span>
+                    </Button>
+                </div>
+
+                <Card>
+                    <CardContent className="p-4 py-0">
+                        <Table >
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Category</TableHead>
+                                    <TableHead className="text-right">Quantity</TableHead>
+                                    <TableHead className="text-right">Unit Price</TableHead>
+                                    <TableHead>Expiry Status</TableHead>
+                                    <TableHead>Stock Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredInventory.map((item) => (
+                                    <TableRow key={item._id}>
+                                        <TableCell className="font-medium">{item.itemName}</TableCell>
+                                        <TableCell>{item.category}</TableCell>
+                                        <TableCell className="text-right">
+                                            {item.quantity} {item.unit}
+                                        </TableCell>
+                                        <TableCell className="text-right">${item.purchasePrice.toFixed(2)}</TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                {getStatusBadge(
+                                                    Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                                                )}
+                                                {(() => {
+                                                    const daysUntilExpiry = Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                                                    return daysUntilExpiry <= 3 && daysUntilExpiry > 0 ? (
+                                                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                                    ) : null;
+                                                })()}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{getStockBadge(item.quantity, 5)}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleDelete(item._id)}
+                                            >
+                                                <Trash className="h-2 w-2" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </>)}
         </div>
     )
 }
