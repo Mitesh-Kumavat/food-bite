@@ -15,33 +15,68 @@ import { mockInventoryData, mockWasteData } from "@/lib/mock-data"
 import { toast } from "sonner"
 import { WasteByReasonChart } from "@/components/dashboard/waste-by-reason-chart"
 import { WasteTrendChart } from "@/components/dashboard/waste-trend-chart"
+import axios from "axios"
+
+interface WasteRecord {
+  _id: string,
+  date: string,
+  itemId: string,
+  itemName: string,
+  quantity: number,
+  unit: string,
+  reason: string,
+  cost: number,
+  description: string,
+  inventoryItem: InventoryItem[] | null
+}
+
+interface InventoryItem {
+  _id: string,
+  itemName: string,
+  category: string,
+  quantity: number,
+  unit: string,
+  purchasePrice: number,
+  expiryDate: string,
+}
 
 export default function WastePage() {
-  const [waste, setWaste] = useState(mockWasteData)
-  const [inventory, setInventory] = useState(mockInventoryData)
+  const [waste, setWaste] = useState<WasteRecord[]>([])
+  const [inventory, setInventory] = useState<InventoryItem[]>()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [isLoading, setIsLoading] = useState(true)
-
-  // New waste form state
   const [newWaste, setNewWaste] = useState({
-    itemId: "",
+    inventoryItemId: "",
     quantity: "1",
     reason: "",
-    notes: "",
+    description: "",
   })
 
   useEffect(() => {
-    // Simulate API call
     const fetchData = async () => {
-      setIsLoading(true)
-      // In a real app, this would be an API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      setWaste(mockWasteData)
-      setInventory(mockInventoryData)
-      setIsLoading(false)
-    }
+      try {
+        const data = await axios.get("/api/restaurant/waste", {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          }
+        });
+        setWaste(data.data)
 
+        const inventoryData = await axios.get("/api/restaurant/inventory", {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          }
+        });
+        setInventory(inventoryData.data)
+      } catch (error) {
+        console.log("Error fetching data:", error);
+      } finally {
+        setIsLoading(false)
+      }
+    }
     fetchData()
   }, [])
 
@@ -57,7 +92,7 @@ export default function WastePage() {
   }
 
   const handleItemChange = (value: string) => {
-    setNewWaste((prev) => ({ ...prev, itemId: value }))
+    setNewWaste((prev) => ({ ...prev, inventoryItemId: value }))
   }
 
   const handleReasonChange = (value: string) => {
@@ -65,72 +100,64 @@ export default function WastePage() {
   }
 
   const addWaste = async () => {
-    if (!newWaste.itemId || !newWaste.quantity || !newWaste.reason) {
-      toast("Error",{
+    console.log("Adding waste:", newWaste);
+
+    if (!newWaste.inventoryItemId || !newWaste.quantity || !newWaste.reason) {
+      toast("Error", {
         description: "Please fill in all required fields",
       })
       return
     }
 
     try {
-      // Find the selected inventory item
-      const item = inventory.find((item) => item.id === newWaste.itemId)
+      const item = inventory?.find((item) => item._id === newWaste.inventoryItemId)
 
       if (!item) {
         throw new Error("Inventory item not found")
       }
 
-      // Create a new waste record
+      const data = await axios.post("/api/restaurant/waste", {
+        inventoryItemId: item._id,
+        quantity: Number.parseFloat(newWaste.quantity),
+        reason: newWaste.reason,
+        description: newWaste.description,
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        }
+      });
+      console.log("Waste added:", data.data)
+
       const wasteRecord = {
-        id: `waste-${Date.now()}`,
-        date: selectedDate,
-        itemId: item.id,
-        itemName: item.name,
+        _id: `waste-${Date.now()}`,
+        date: Date.now(),
+        indexedDBtemId: item._id,
+        itemName: item.itemName,
         quantity: Number.parseFloat(newWaste.quantity),
         unit: item.unit,
         reason: newWaste.reason,
-        cost: item.unitPrice * Number.parseFloat(newWaste.quantity),
-        notes: newWaste.notes,
+        cost: Number(newWaste.quantity) * item.purchasePrice,
+        purchasePrice: item.purchasePrice * Number.parseFloat(newWaste.quantity),
+        description: newWaste.description,
+        inventoryItem: null,
       }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      setWaste((prev: any) => [wasteRecord, ...prev])
 
-      // Update waste state
-      setWaste((prev) => [wasteRecord, ...prev])
-
-      // Reset form
       setNewWaste({
-        itemId: "",
+        inventoryItemId: "",
         quantity: "1",
         reason: "",
-        notes: "",
+        description: "",
       })
 
-      toast("Waste recorded",{
+      toast("Waste recorded", {
         description: `${wasteRecord.quantity} ${wasteRecord.unit} of ${wasteRecord.itemName} recorded as waste.`,
       })
     } catch (error) {
-      toast("Error",{
+      toast("Error", {
         description: "Failed to record waste. Please try again.",
-      })
-    }
-  }
-
-  const deleteWaste = async (id: string) => {
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
-
-      // Update waste state
-      setWaste((prev) => prev.filter((item) => item.id !== id))
-
-      toast("Waste record deleted",{
-        description: "The waste record has been removed.",
-      })
-    } catch (error) {
-      toast("Error",{
-        description: "Failed to delete waste record. Please try again.",
       })
     }
   }
@@ -159,8 +186,8 @@ export default function WastePage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
-            <h2 className="text-2xl font-semibold">Waste Management</h2>
-            <p>Track and analyze food waste to optimize inventory</p>
+          <h2 className="text-2xl font-semibold">Waste Management</h2>
+          <p>Track and analyze food waste to optimize inventory</p>
         </div>
       </div>
 
@@ -171,7 +198,7 @@ export default function WastePage() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalWasteCost.toFixed(2)}</div>
+            <div className="text-2xl font-bold">₹{totalWasteCost.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">From {totalWasteItems} waste records</p>
           </CardContent>
         </Card>
@@ -212,14 +239,14 @@ export default function WastePage() {
               />
             </div>
             <div>
-              <Select value={newWaste.itemId} onValueChange={handleItemChange}>
+              <Select name="inventoryItemId" value={newWaste.inventoryItemId} onValueChange={handleItemChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select inventory item" />
                 </SelectTrigger>
                 <SelectContent>
-                  {inventory.map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
-                      {item.name} ({item.quantity} {item.unit})
+                  {inventory?.map((item) => (
+                    <SelectItem key={item._id} value={item._id}>
+                      {item.itemName}({item.quantity} {item.unit})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -229,8 +256,7 @@ export default function WastePage() {
               <Input
                 name="quantity"
                 type="number"
-                min="0.01"
-                step="0.01"
+                min="1"
                 placeholder="Quantity"
                 value={newWaste.quantity}
                 onChange={handleNewWasteChange}
@@ -255,9 +281,9 @@ export default function WastePage() {
           </div>
           <div className="mt-4">
             <Textarea
-              name="notes"
+              name="description"
               placeholder="Additional notes about this waste..."
-              value={newWaste.notes}
+              value={newWaste.description}
               onChange={handleNewWasteChange}
               className="min-h-[80px]"
             />
@@ -292,31 +318,25 @@ export default function WastePage() {
         <CardContent className="p-5 py-0">
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow >
                 <TableHead>Date</TableHead>
                 <TableHead>Item</TableHead>
-                <TableHead className="text-right">Quantity</TableHead>
+                <TableHead className="">Quantity</TableHead>
                 <TableHead>Reason</TableHead>
                 <TableHead className="text-right">Cost</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredWaste.map((item) => (
-                <TableRow key={item.id}>
+                <TableRow key={item._id}>
                   <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
                   <TableCell className="font-medium">{item.itemName}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="">
                     {item.quantity} {item.unit}
                   </TableCell>
                   <TableCell>{item.reason}</TableCell>
-                  <TableCell className="text-right">${item.cost.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => deleteWaste(item.id)}>
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </TableCell>
+                  <TableCell className="text-right">₹{item.cost.toFixed(2)}</TableCell>
+
                 </TableRow>
               ))}
             </TableBody>

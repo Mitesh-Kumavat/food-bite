@@ -78,7 +78,7 @@ export function WasteTrendChart({ data }: WasteTrendChartProps) {
             return null
           }}
         />
-        <Line type="monotone" dataKey="cost" stroke="red" strokeWidth={2} activeDot={{ r: 6 }} />
+        <Line type="bump" dataKey="cost" stroke="red" strokeWidth={2} activeDot={{ r: 6 }} />
       </LineChart>
     </ResponsiveContainer>
   )

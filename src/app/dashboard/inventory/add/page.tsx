@@ -23,7 +23,7 @@ export default function AddInventoryPage() {
         category: "",
         quantity: "",
         unit: "kg",
-        expiryDate: "",
+        expiryDate: 0,
         purchasePrice: "",
         supplier: "",
         minStockLevel: "",
@@ -135,7 +135,6 @@ export default function AddInventoryPage() {
                                     name="quantity"
                                     type="number"
                                     min="0"
-                                    step="0.01"
                                     placeholder="e.g., 10"
                                     value={formData.quantity}
                                     onChange={handleChange}
@@ -150,7 +149,7 @@ export default function AddInventoryPage() {
                                     id="expiryDate"
                                     name="expiryDate"
                                     type="expiryDate"
-                                    min="1"
+                                    min='0'
                                     placeholder="e.g.1, 5, 10"
                                     value={formData.expiryDate}
                                     onChange={handleChange}
@@ -171,7 +170,7 @@ export default function AddInventoryPage() {
                                     <SelectContent>
                                         <SelectItem value="kg">Kilograms (kg)</SelectItem>
                                         <SelectItem value="g">Grams (g)</SelectItem>
-                                        <SelectItem value="l">Liters (l)</SelectItem>
+                                        <SelectItem value="l">Liters (L)</SelectItem>
                                         <SelectItem value="ml">Milliliters (ml)</SelectItem>
                                         <SelectItem value="pcs">Pieces (pcs)</SelectItem>
                                         <SelectItem value="box">Box</SelectItem>
