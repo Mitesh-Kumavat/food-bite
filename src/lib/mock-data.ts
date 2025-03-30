@@ -1,11 +1,9 @@
 // Dashboard mock data
 export const mockDashboardData = {
     totalRevenue: 45231.89,
-    revenueChange: 20.1,
     inventoryValue: 12500,
     inventoryItems: 156,
     menuItemsSold: 2350,
-    menuItemsSoldChange: 15.3,
     profitLoss: 18.5,
     salesData: [
         { date: "Jan 1", amount: 1200 },
