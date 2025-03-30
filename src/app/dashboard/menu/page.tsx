@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, } from "@/components/ui/card"
 import { Search, Plus, Filter, MoreHorizontal, Eye } from "lucide-react"
 import Link from "next/link"
 import {
@@ -17,7 +17,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import axios from "axios"
-import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface MenuItem {
@@ -73,7 +72,7 @@ export default function MenuPage() {
             <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-1">
                     <h1 className="text-2xl font-bold">Menu Management</h1>
-                    <p className="">Manage your restaurant's menu items</p>
+                    <p className="text-sm">Manage your restaurant's menu items</p>
                 </div>
                 <Link href="/dashboard/menu/add">
                     <Button>

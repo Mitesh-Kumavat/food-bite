@@ -126,8 +126,8 @@ export default function InventoryPage() {
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-1">
-                    <h2 className="text-2xl font-semibold">Inventory Management</h2>
-                    <p>Track and manage your restaraunt's inventory</p>
+                    <h2 className="text-2xl font-bold">Inventory Management</h2>
+                    <p className="text-sm">Track and manage your restaraunt's inventory</p>
                 </div>
                 <Link href="/dashboard/inventory/add">
                     <Button>
@@ -210,11 +210,11 @@ export default function InventoryPage() {
                                 <TableRow>
                                     <TableHead>Name</TableHead>
                                     <TableHead>Category</TableHead>
-                                    <TableHead className="text-right">Quantity</TableHead>
-                                    <TableHead className="text-right">Unit Price</TableHead>
+                                    <TableHead>Quantity</TableHead>
+                                    <TableHead>Unit Price</TableHead>
                                     <TableHead>Expiry Status</TableHead>
                                     <TableHead>Stock Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                    <TableHead>Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -222,10 +222,10 @@ export default function InventoryPage() {
                                     <TableRow key={item._id}>
                                         <TableCell className="font-medium">{item.itemName}</TableCell>
                                         <TableCell>{item.category}</TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell>
                                             {item.quantity} {item.unit}
                                         </TableCell>
-                                        <TableCell className="text-right">${item.purchasePrice.toFixed(2)}</TableCell>
+                                        <TableCell >₹ {item.purchasePrice.toFixed(2)}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 {getStatusBadge(
@@ -240,7 +240,7 @@ export default function InventoryPage() {
                                             </div>
                                         </TableCell>
                                         <TableCell>{getStockBadge(item.quantity, 5)}</TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"

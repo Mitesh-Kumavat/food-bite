@@ -171,9 +171,9 @@ export default function SalesPage() {
     return (
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                    <h2 className="text-2xl font-semibold">Daily Sales</h2>
-                    <p>Record and track your daily sales</p>
+                <div className="flex flex-col gap-1">
+                    <h2 className="text-2xl font-bold">Daily Sales</h2>
+                    <p className="text-sm">Record and track your daily sales</p>
                 </div>
             </div>
 
@@ -253,7 +253,7 @@ export default function SalesPage() {
                                             <TableCell>{new Date(sale.saleDate).toLocaleDateString()}</TableCell>
                                             <TableCell>{sale.dishes[0].dish.name}</TableCell>
                                             <TableCell>{sale.dishes[0].quantity}</TableCell>
-                                            <TableCell>${sale.totalSales.toFixed(2)}</TableCell>
+                                            <TableCell>₹ {sale.totalSales.toFixed(2)}</TableCell>
                                             <TableCell>
                                                 <Button variant="ghost" size="icon" onClick={() => deleteSale(sale._id)}>
                                                     <Trash2 className="h-4 w-4 text-red-500" />

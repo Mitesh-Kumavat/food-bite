@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Plus, Filter, Trash2, AlertTriangle } from "lucide-react"
+import { Search, Plus, Filter, AlertTriangle } from "lucide-react"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
@@ -184,8 +184,8 @@ export default function WastePage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-semibold">Waste Management</h2>
-          <p>Track and analyze food waste to optimize inventory</p>
+          <h2 className="text-2xl font-bold">Waste Management</h2>
+          <p className="text-sm">Track and analyze food waste to optimize inventory</p>
         </div>
       </div>
 
@@ -205,26 +205,52 @@ export default function WastePage() {
           </Card>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Waste by Reason</CardTitle>
-              <CardDescription>Cost breakdown by waste reason</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              <WasteByReasonChart data={wasteByReasonData} />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Waste Trend</CardTitle>
-              <CardDescription>Daily waste cost for the last 7 days</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              <WasteTrendChart data={waste} />
-            </CardContent>
-          </Card>
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search waste records..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button variant="outline" size="icon">
+            <Filter className="h-4 w-4" />
+            <span className="sr-only">Filter</span>
+          </Button>
         </div>
+
+        <Card>
+          <CardContent className="p-4 py-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Item</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead>Cost</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y">
+                {filteredWaste.map((item) => (
+                  <TableRow key={item._id} >
+                    <TableCell className="py-4">{new Date(item.date).toLocaleDateString()}</TableCell>
+                    <TableCell className="font-medium py-4">{item.itemName}</TableCell>
+                    <TableCell className="py-4">
+                      {item.quantity} {item.unit}
+                    </TableCell>
+                    <TableCell className="py-4">{item.reason}</TableCell>
+                    <TableCell className="py-4">₹{item.cost.toFixed(2)}</TableCell>
+
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
@@ -298,52 +324,26 @@ export default function WastePage() {
           </CardContent>
         </Card>
 
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search waste records..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
-            <span className="sr-only">Filter</span>
-          </Button>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Waste by Reason</CardTitle>
+              <CardDescription>Cost breakdown by waste reason</CardDescription>
+            </CardHeader>
+            <CardContent className="h-[300px]">
+              <WasteByReasonChart data={wasteByReasonData} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Waste Trend</CardTitle>
+              <CardDescription>Daily waste cost for the last 7 days</CardDescription>
+            </CardHeader>
+            <CardContent className="h-[300px]">
+              <WasteTrendChart data={waste} />
+            </CardContent>
+          </Card>
         </div>
-
-        <Card>
-          <CardContent className="p-5 py-0">
-            <Table>
-              <TableHeader>
-                <TableRow >
-                  <TableHead>Date</TableHead>
-                  <TableHead>Item</TableHead>
-                  <TableHead className="">Quantity</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead className="text-right">Cost</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredWaste.map((item) => (
-                  <TableRow key={item._id}>
-                    <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
-                    <TableCell className="font-medium">{item.itemName}</TableCell>
-                    <TableCell className="">
-                      {item.quantity} {item.unit}
-                    </TableCell>
-                    <TableCell>{item.reason}</TableCell>
-                    <TableCell className="text-right">₹{item.cost.toFixed(2)}</TableCell>
-
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
       </>)}
     </div>
   )

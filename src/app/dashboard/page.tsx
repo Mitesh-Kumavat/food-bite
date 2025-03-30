@@ -2,17 +2,38 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { DollarSign, ShoppingBag, Utensils, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react"
+import { DollarSign, ShoppingBag, Utensils, TrendingUp, } from "lucide-react"
 import { SalesChart } from "@/components/dashboard/sales-chart"
 import { InventoryStatusChart } from "@/components/dashboard/inventory-status-chart"
-import { mockDashboardData } from "@/lib/mock-data"
 import { toast } from "sonner"
 import axios from "axios"
 import DashboardSkeleton from "@/components/dashboard/skeleton"
 
+
+interface InventoryStatus {
+    name: string;
+    value: number;
+    color: string;
+}
+
+interface SalesData {
+    date: string;
+    revenue: number;
+}
+
+interface DashboardData {
+    inventoryItems: number;
+    inventoryStatus: InventoryStatus[];
+    inventoryValue: number;
+    menuItemsSold: number;
+    profitLoss: number;
+    salesData: SalesData[];
+    totalRevenue: number;
+}
+
 export default function HomePage() {
 
-    const [data, setData] = useState(mockDashboardData)
+    const [data, setData] = useState<DashboardData | any>(null);
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
@@ -34,13 +55,12 @@ export default function HomePage() {
                 setIsLoading(false)
             }
         }
-
         fetchData()
     }, [])
 
     return (
         <div className="space-y-6">
-            <h2 className="text-xl font-bold">Dashboard</h2>
+            <h2 className="text-2xl font-bold">Dashboard</h2>
 
             {isLoading && <DashboardSkeleton />}
 
@@ -101,7 +121,7 @@ export default function HomePage() {
                                 <CardDescription>Daily sales for the current month</CardDescription>
                             </CardHeader>
                             <CardContent className="pl-2">
-                                <SalesChart data={data.salesData} />
+                                <SalesChart data={data?.salesData} />
                             </CardContent>
                         </Card>
                     </div>
@@ -112,7 +132,7 @@ export default function HomePage() {
                                 <CardDescription>Current inventory by category</CardDescription>
                             </CardHeader>
                             <CardContent className="pl-2">
-                                <InventoryStatusChart data={data.inventoryStatus} />
+                                <InventoryStatusChart data={data ? data.inventoryStatus : []} />
                             </CardContent>
                         </Card>
                         <Card className="col-span-3">
@@ -124,16 +144,16 @@ export default function HomePage() {
                                 <div className="space-y-4">
                                     {/* generate dummy data here */}
                                     {/* {data.alerts.map((alert, i) => (
-                                    <div key={i} className="flex items-start gap-4 rounded-md border p-4">
-                                        <AlertTriangle
-                                            className={`mt-0.5 h-5 w-5 ${alert.type === "warning" ? "text-amber-500" : "text-red-500"}`}
-                                        />
-                                        <div className="flex-1 space-y-1">
-                                            <p className="text-sm font-medium leading-none">{alert.title}</p>
-                                            <p className="text-sm text-muted-foreground">{alert.description}</p>
+                                        <div key={i} className="flex items-start gap-4 rounded-md border p-4">
+                                            <AlertTriangle
+                                                className={`mt-0.5 h-5 w-5 ${alert.type === "warning" ? "text-amber-500" : "text-red-500"}`}
+                                            />
+                                            <div className="flex-1 space-y-1">
+                                                <p className="text-sm font-medium leading-none">{alert.title}</p>
+                                                <p className="text-sm text-muted-foreground">{alert.description}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))} */}
+                                    ))} */}
                                 </div>
                             </CardContent>
                         </Card>

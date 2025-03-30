@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft } from 'lucide-react'
 import Link from "next/link"
 import { toast } from "sonner"
-import { DatePicker } from "@/components/ui/date-picker"
 import axios from "axios"
 
 export default function AddInventoryPage() {
