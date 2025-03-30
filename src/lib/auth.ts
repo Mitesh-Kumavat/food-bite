@@ -11,6 +11,7 @@ export async function getJwtSecretKey() {
 // Verify JWT from Authorization header
 export async function verifyAuth(request: NextRequest) {
   const authHeader = request.headers.get("Authorization");
+  console.log(authHeader, "AUTH HEADER");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     throw new Error("Missing or invalid Authorization header");

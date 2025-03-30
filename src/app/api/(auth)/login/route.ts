@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
         const token = await user.createAccessToken();
         const finalUser = {
             _id: user._id,
+            token: user.accessToken,
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,

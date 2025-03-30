@@ -6,6 +6,8 @@ import { DollarSign, ShoppingBag, Utensils, TrendingUp, TrendingDown, AlertTrian
 import { SalesChart } from "@/components/dashboard/sales-chart"
 import { InventoryStatusChart } from "@/components/dashboard/inventory-status-chart"
 import { mockDashboardData } from "@/lib/mock-data"
+import { toast } from "sonner"
+import axios from "axios"
 
 export default function HomePage() {
 
@@ -13,12 +15,25 @@ export default function HomePage() {
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        // Simulate API call
         const fetchData = async () => {
             setIsLoading(true)
-            // In a real app, this would be an API call
-            await new Promise((resolve) => setTimeout(resolve, 500))
-            setData(mockDashboardData)
+            try {
+                const token = localStorage.getItem("token");
+
+                const data = await axios.get("/api/restaurant/dashboard", {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                })
+                setData(data.data)
+            } catch (error) {
+                console.log(error, "error");
+                toast.error("Failed to fetch data")
+            } finally {
+                setIsLoading(false)
+            }
+            // setData(mockDashboardData)
             setIsLoading(false)
         }
 
@@ -36,10 +51,9 @@ export default function HomePage() {
                             <DollarSign className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">${data.totalRevenue.toLocaleString()}</div>
+                            <div className="text-2xl font-bold">₹{data.totalRevenue.toLocaleString()}</div>
                             <p className="text-xs text-muted-foreground">
-                                {data.revenueChange > 0 ? "+" : ""}
-                                {data.revenueChange}% from last month
+                                from today's sell
                             </p>
                         </CardContent>
                     </Card>
@@ -49,7 +63,7 @@ export default function HomePage() {
                             <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">${data.inventoryValue.toLocaleString()}</div>
+                            <div className="text-2xl font-bold">₹{data.inventoryValue.toLocaleString()}</div>
                             <p className="text-xs text-muted-foreground">{data.inventoryItems} items in stock</p>
                         </CardContent>
                     </Card>
@@ -61,26 +75,20 @@ export default function HomePage() {
                         <CardContent>
                             <div className="text-2xl font-bold">{data.menuItemsSold}</div>
                             <p className="text-xs text-muted-foreground">
-                                {data.menuItemsSoldChange > 0 ? "+" : ""}
-                                {data.menuItemsSoldChange}% from last month
+                                from today's sell
                             </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Profit/Loss</CardTitle>
-                            {data.profitLoss > 0 ? (
-                                <TrendingUp className="h-4 w-4 text-green-500" />
-                            ) : (
-                                <TrendingDown className="h-4 w-4 text-red-500" />
-                            )}
+                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className={`text-2xl font-bold ${data.profitLoss > 0 ? "text-green-500" : "text-red-500"}`}>
-                                {data.profitLoss > 0 ? "+" : ""}
-                                {data.profitLoss}%
+                                ₹{data.profitLoss}
                             </div>
-                            <p className="text-xs text-muted-foreground">Compared to last month</p>
+                            <p className="text-xs text-muted-foreground">from today's sell</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -112,7 +120,8 @@ export default function HomePage() {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                {data.alerts.map((alert, i) => (
+                                {/* generate dummy data here */}
+                                {/* {data.alerts.map((alert, i) => (
                                     <div key={i} className="flex items-start gap-4 rounded-md border p-4">
                                         <AlertTriangle
                                             className={`mt-0.5 h-5 w-5 ${alert.type === "warning" ? "text-amber-500" : "text-red-500"}`}
@@ -122,7 +131,7 @@ export default function HomePage() {
                                             <p className="text-sm text-muted-foreground">{alert.description}</p>
                                         </div>
                                     </div>
-                                ))}
+                                ))} */}
                             </div>
                         </CardContent>
                     </Card>

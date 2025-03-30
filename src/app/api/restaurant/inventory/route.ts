@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const payload = await verifyAuth(req);
-    const { itemName, quantity, unit, category,purchasePrice, expiryDate } = await req.json();
+    const { itemName, quantity, unit, category, purchasePrice, expiryDate } = await req.json();
     console.log(payload)
     const restaurant = await Restaurant.findOne({ owner: payload._id });
     if (!restaurant) {

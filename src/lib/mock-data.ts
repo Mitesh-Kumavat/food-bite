@@ -116,15 +116,6 @@ export const mockSalesData = [
         unitPrice: 12.99,
         total: 25.98,
     },
-    {
-        id: "sale-002",
-        date: new Date(),
-        itemId: "menu-003",
-        itemName: "Caesar Salad",
-        quantity: 1,
-        unitPrice: 9.99,
-        total: 9.99,
-    },
 ]
 
 // Waste mock data
@@ -304,4 +295,23 @@ export const mockAnalyticsData = {
         foodCostChange: -1.8,
         mostProfitableItem: "Margherita Pizza",
     }
+}
+
+
+interface Sale {
+    _id: string, //
+    restaurant: string,
+    dishes: [
+        {
+            dish: {
+                _id: string, //dish._id
+                name: string, //
+                price: number, //dish.price
+            },
+            quantity: number,
+            _id: string
+        }
+    ],
+    totalSales: number, //
+    saleDate: string, //
 }

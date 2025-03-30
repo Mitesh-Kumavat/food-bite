@@ -1,17 +1,11 @@
 "use client"
 
 import { TableCell } from "@/components/ui/table"
-
 import { TableBody } from "@/components/ui/table"
-
 import { TableHead } from "@/components/ui/table"
-
 import { TableRow } from "@/components/ui/table"
-
 import { TableHeader } from "@/components/ui/table"
-
 import { Table } from "@/components/ui/table"
-
 import type React from "react"
 
 import { useState } from "react"
@@ -26,20 +20,29 @@ import { Switch } from "@/components/ui/switch"
 import { ArrowLeft, Plus, X } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
+import axios from "axios"
+
+interface Ingredients {
+    name: string,
+    quantity: string,
+    unit: string
+}
 
 export default function AddMenuItemPage() {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [ingredients, setIngredients] = useState<{ name: string; quantity: string; unit: string }[]>([])
-    const [newIngredient, setNewIngredient] = useState({ name: "", quantity: "", unit: "g" })
+    const [ingredients, setIngredients] = useState<Ingredients[]>([])
+    const [newIngredient, setNewIngredient] = useState<Ingredients>(
+        { name: "", quantity: "", unit: "g" }
+    )
 
     const [formData, setFormData] = useState({
         name: "",
         category: "",
         price: "",
         description: "",
-        active: true,
-        preparationTime: "",
+        activeOnMenu: true,
+        prepTime: "",
         allergens: "",
     })
 
@@ -81,8 +84,16 @@ export default function AddMenuItemPage() {
         setIsSubmitting(true)
 
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1000))
+            const data = await axios.post("/api/restaurant/menu", {
+                ...formData,
+                ...ingredients,
+            }, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            })
+            console.log(data.data);
 
             toast("Menu item added", {
                 description: `${formData.name} has been added to the menu.`,
@@ -90,7 +101,7 @@ export default function AddMenuItemPage() {
 
             router.push("/dashboard/menu")
         } catch (error) {
-            toast("Error", {
+            toast.error("Error", {
                 description: "Failed to add menu item. Please try again.",
             })
         } finally {
@@ -168,14 +179,14 @@ export default function AddMenuItemPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="preparationTime">Preparation Time (minutes)</Label>
+                                <Label htmlFor="prepTime">Preparation Time (minutes)</Label>
                                 <Input
-                                    id="preparationTime"
-                                    name="preparationTime"
+                                    id="prepTime"
+                                    name="prepTime"
                                     type="number"
                                     min="1"
                                     placeholder="e.g., 15"
-                                    value={formData.preparationTime}
+                                    value={formData.prepTime}
                                     onChange={handleChange}
                                     required
                                 />
@@ -191,8 +202,8 @@ export default function AddMenuItemPage() {
                                 />
                             </div>
                             <div className="flex items-center space-x-2 pt-6">
-                                <Switch id="active" checked={formData.active} onCheckedChange={handleSwitchChange} />
-                                <Label htmlFor="active">Active on Menu</Label>
+                                <Switch id="activeOnMenu" checked={formData.activeOnMenu} onCheckedChange={handleSwitchChange} />
+                                <Label htmlFor="activeOnMenu">Active on Menu</Label>
                             </div>
                         </div>
 

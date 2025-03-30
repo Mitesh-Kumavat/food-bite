@@ -34,6 +34,7 @@ export default function LoginPage() {
         try {
             const response = await axios.post("/api/login", formData)
             localStorage.setItem("userId", response.data.data._id);
+            localStorage.setItem("token", response.data.data.token);
             console.log("Login successful:", response.data.data)
             if (response.status !== 200) {
                 setError("Login failed")

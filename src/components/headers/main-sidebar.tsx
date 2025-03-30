@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, ChefHat, Home, Menu, Package, ShoppingCart, Trash2 } from "lucide-react"
+import { ChefHat, Home, Menu, Package, ShoppingCart, Trash2 } from "lucide-react"
 
 import {
     Sidebar,
@@ -61,11 +61,6 @@ export function MainSidebar() {
             title: "Waste",
             href: "/dashboard/waste",
             icon: Trash2,
-        },
-        {
-            title: "Analytics",
-            href: "/dashboard/analytics",
-            icon: BarChart3,
         },
     ]
 

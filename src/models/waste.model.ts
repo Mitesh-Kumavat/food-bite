@@ -22,12 +22,12 @@ const wasteSchema = new Schema<IWaste>({
   quantity: { type: Number, required: true },
   unit: { type: String, required: true },
   reason: { type: String, required: true },
-  description: {type:String},
+  description: { type: String },
   date: { type: Date, default: Date.now },
 },
-{
+  {
     timestamps: true,
-});
+  });
 
 const Waste =
   mongoose.models?.Waste || mongoose.model<IWaste>("Waste", wasteSchema);
