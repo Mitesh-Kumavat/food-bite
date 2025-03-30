@@ -59,15 +59,9 @@ function Calendar({
         day_hidden: "invisible",
         ...classNames,
       }}
-      components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("size-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("size-4", className)} {...props} />
-        ),
-      }}
-      {...props}
+      fromMonth={new Date(2022, 0)} // Example: Set the starting month
+      toMonth={new Date(2023, 11)} // Example: Set the ending month
+        {...props}
     />
   )
 }

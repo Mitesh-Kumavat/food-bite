@@ -6,22 +6,49 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Plus, Filter, AlertTriangle } from "lucide-react"
+import { Search, Plus, Filter, AlertTriangle, Trash } from "lucide-react"
 import Link from "next/link"
-import { mockInventoryData } from "@/lib/mock-data"
+import { toast } from "sonner"
+import axios from "axios"
+
+interface InventoryItem {
+    _id: string,
+    itemName: string,
+    category: string,
+    quantity: number,
+    unit: string,
+    purchasePrice: number,
+    expiryDate: string,
+}
 
 export default function InventoryPage() {
-    const [inventory, setInventory] = useState(mockInventoryData)
+    const [inventory, setInventory] = useState<InventoryItem[]>([])
     const [searchQuery, setSearchQuery] = useState("")
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        // Simulate API call
         const fetchData = async () => {
-            setIsLoading(true)
-            // In a real app, this would be an API call
-            await new Promise((resolve) => setTimeout(resolve, 500))
-            setInventory(mockInventoryData)
+            try {
+                const token = localStorage.getItem("token")
+                const response = await axios.get("/api/restaurant/inventory", {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                })
+
+                const data = response.data;
+                console.log(data, "DATA")
+                setInventory(data)
+            } catch (error) {
+                console.log(error);
+                toast.error("Failed to fetch inventory data", {
+                    description: "Please try again later.",
+                })
+            } finally {
+                setIsLoading(false)
+            }
+            // setInventory(mockInventoryData)
             setIsLoading(false)
         }
 
@@ -30,9 +57,29 @@ export default function InventoryPage() {
 
     const filteredInventory = inventory.filter(
         (item) =>
-            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.category.toLowerCase().includes(searchQuery.toLowerCase()),
     )
+
+    const handleDelete = async (id: string) => {
+        try {
+            const token = localStorage.getItem("token")
+            await axios.delete(`/api/restaurant/inventory/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            })
+
+            toast.success("Item deleted successfully")
+            setInventory((prevInventory) => prevInventory.filter((item) => item._id !== id))
+        } catch (error) {
+            console.log(error)
+            toast.error("Failed to delete item", {
+                description: "Please try again later.",
+            })
+        }
+    }
 
     const getStatusBadge = (daysUntilExpiry: number) => {
         if (daysUntilExpiry <= 0) {
@@ -106,7 +153,7 @@ export default function InventoryPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {inventory.filter((item) => item.quantity <= item.minStock).length}
+                            {inventory.filter((item) => item.quantity <= 5).length}
                         </div>
                     </CardContent>
                 </Card>
@@ -116,7 +163,7 @@ export default function InventoryPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {inventory.filter((item) => item.daysUntilExpiry <= 7 && item.daysUntilExpiry > 0).length}
+                            {inventory.filter((item) => new Date(item.expiryDate) >= new Date()).length}
                         </div>
                     </CardContent>
                 </Card>
@@ -126,7 +173,10 @@ export default function InventoryPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-red-500">
-                            {inventory.filter((item) => item.daysUntilExpiry <= 0).length}
+                            {inventory.filter((item) => {
+                                const daysUntilExpiry = Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                                return daysUntilExpiry <= 0;
+                            }).length}
                         </div>
                     </CardContent>
                 </Card>
@@ -160,26 +210,41 @@ export default function InventoryPage() {
                                 <TableHead className="text-right">Unit Price</TableHead>
                                 <TableHead>Expiry Status</TableHead>
                                 <TableHead>Stock Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {filteredInventory.map((item) => (
-                                <TableRow key={item.id}>
-                                    <TableCell className="font-medium">{item.name}</TableCell>
+                                <TableRow key={item._id}>
+                                    <TableCell className="font-medium">{item.itemName}</TableCell>
                                     <TableCell>{item.category}</TableCell>
                                     <TableCell className="text-right">
                                         {item.quantity} {item.unit}
                                     </TableCell>
-                                    <TableCell className="text-right">${item.unitPrice.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">${item.purchasePrice.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
-                                            {getStatusBadge(item.daysUntilExpiry)}
-                                            {item.daysUntilExpiry <= 3 && item.daysUntilExpiry > 0 && (
-                                                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                            {getStatusBadge(
+                                                Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
                                             )}
+                                            {(() => {
+                                                const daysUntilExpiry = Math.ceil((new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                                                return daysUntilExpiry <= 3 && daysUntilExpiry > 0 ? (
+                                                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                                ) : null;
+                                            })()}
                                         </div>
                                     </TableCell>
-                                    <TableCell>{getStockBadge(item.quantity, item.minStock)}</TableCell>
+                                    <TableCell>{getStockBadge(item.quantity, 5)}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleDelete(item._id)}
+                                        >
+                                            <Trash className="h-2 w-2" />
+                                        </Button>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

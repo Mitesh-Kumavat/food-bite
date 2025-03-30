@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Search, Plus, Filter, MoreHorizontal, Eye } from "lucide-react"
 import Link from "next/link"
-import { mockMenuData } from "@/lib/mock-data"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,20 +16,45 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import axios from "axios"
+
+interface MenuItem {
+    _id: string,
+    name: string,
+    activeOnMenu: true,
+    category: string,
+    price: number,
+    ingredients: [
+        {
+            id: string,
+            name: string,
+            quantity: number,
+            unit: string
+        },
+    ],
+}
 
 export default function MenuPage() {
-    const [menu, setMenu] = useState(mockMenuData)
+    const [menu, setMenu] = useState<MenuItem[]>([])
     const [searchQuery, setSearchQuery] = useState("")
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         // Simulate API call
         const fetchData = async () => {
-            setIsLoading(true)
-            // In a real app, this would be an API call
-            await new Promise((resolve) => setTimeout(resolve, 500))
-            setMenu(mockMenuData)
-            setIsLoading(false)
+            try {
+                const data = await axios.get("/api/restaurant/menu", {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    },
+                })
+                setMenu(data.data)
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setIsLoading(false)
+            }
         }
 
         fetchData()
@@ -88,12 +112,12 @@ export default function MenuPage() {
                         </TableHeader>
                         <TableBody>
                             {filteredMenu.map((item) => (
-                                <TableRow key={item.id}>
+                                <TableRow key={item._id}>
                                     <TableCell className="font-medium">{item.name}</TableCell>
                                     <TableCell>{item.category}</TableCell>
                                     <TableCell>${item.price.toFixed(2)}</TableCell>
                                     <TableCell>
-                                        <Badge variant={item.active ? "outline" : "secondary"}>{item.active ? "Active" : "Inactive"}</Badge>
+                                        <Badge variant={item.activeOnMenu ? "outline" : "secondary"}>{item.activeOnMenu ? "Active" : "Inactive"}</Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <DropdownMenu>
