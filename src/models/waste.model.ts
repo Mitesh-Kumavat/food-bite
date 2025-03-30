@@ -15,10 +15,10 @@ export interface IWaste extends Document {
 
 const wasteSchema = new Schema<IWaste>({
   restaurant: { type: Schema.Types.ObjectId, ref: "Restaurant", required: true },
-  inventoryItem: { type: Schema.Types.ObjectId, ref: "Inventory" },
-  itemName: { type: String },
-  price: { type: Number },
-  cost: { type: Number },
+  inventoryItem: { type: Schema.Types.ObjectId, ref:"Inventory"},
+  itemName: {type: String},
+  price: {type: Number},
+  cost: {type: Number},
   quantity: { type: Number, required: true },
   unit: { type: String, required: true },
   reason: { type: String, required: true },

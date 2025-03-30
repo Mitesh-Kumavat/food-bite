@@ -97,13 +97,12 @@ export async function GET(req: NextRequest) {
     ]);
 
     const categoryColors: any = {
-      Produce: "#4CAF50",
-      Meat: "#F44336",
-      Dairy: "#2196F3",
-      Grains: "#FF9800",
-      Beverages: "#9C27B0",
+      produce: "#4CAF50",
+      meat: "#F44336",
+      dairy: "#2196F3",
+      grains: "#FF9800",
+      beverages: "#9C27B0",
     };
-
     const inventoryStatus = inventoryStatusData.map((item) => ({
       name: item._id,
       value: item.value,

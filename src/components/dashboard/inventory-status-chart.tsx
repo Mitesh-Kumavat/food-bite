@@ -40,7 +40,7 @@ export function InventoryStatusChart({ data }: InventoryStatusChartProps) {
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-[0.70rem] uppercase text-muted-foreground">Value</span>
-                                            <span className="font-bold">${payload[0].value}</span>
+                                            <span className="font-bold">₹{payload[0].value}</span>
                                         </div>
                                     </div>
                                 </div>
