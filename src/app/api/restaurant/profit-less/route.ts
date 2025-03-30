@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     });
 
     const totalInventoryCost = inventoryPurchased.reduce(
-      (sum, item) => sum + item.purchaseCost * item.quantity,
+      (sum, item) => sum + item.purchasePrice * item.quantity,
       0
     );
 
@@ -50,15 +50,15 @@ export async function POST(req: NextRequest) {
       restaurant: restaurant._id,
       createdAt: { $gte: startOfDay, $lte: endOfDay },
     });
-
-    const totalWasteCost = wasteRecords.reduce(
-      (sum, waste) => sum + waste.quantity * waste.unitCost,
+    console.log(wasteRecords)
+    let totalWasteCost = wasteRecords.reduce(
+      (sum, waste) => sum + waste.cost,
       0
     );
-
+    console.log(totalInventoryCost)
     // ✅ 4. Calculate profit/loss
     const profit = totalIncome - (totalInventoryCost + totalWasteCost);
-
+    console.log(profit)
     // ✅ 5. Save the profit/loss in ProfitLoss
     const profitLossRecord = await ProfitLoss.create({
       restaurant: restaurant._id,
