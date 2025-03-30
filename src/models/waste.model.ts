@@ -3,6 +3,9 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IWaste extends Document {
   restaurant: mongoose.Types.ObjectId;
   inventoryItem: mongoose.Types.ObjectId; // reference to Inventory (if applicable)
+  itemName: string;
+  price: number;
+  cost: number;
   quantity: number;
   unit: string;
   reason: string;
@@ -12,7 +15,10 @@ export interface IWaste extends Document {
 
 const wasteSchema = new Schema<IWaste>({
   restaurant: { type: Schema.Types.ObjectId, ref: "Restaurant", required: true },
-  inventoryItem: { type: Schema.Types.ObjectId, ref: "Inventory" },
+  inventoryItem: { type: Schema.Types.ObjectId, ref:"Inventory"},
+  itemName: {type: String},
+  price: {type: Number},
+  cost: {type: Number},
   quantity: { type: Number, required: true },
   unit: { type: String, required: true },
   reason: { type: String, required: true },

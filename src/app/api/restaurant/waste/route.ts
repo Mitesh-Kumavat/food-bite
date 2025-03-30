@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const payload = await verifyAuth(req);
-    const { quantity, unit, reason, description, inventoryItemId } =
+    const { quantity , reason, description, inventoryItemId } =
       await req.json();
 
     // Get the restaurant associated with the logged-in user
@@ -100,13 +100,16 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const cost = quantity * inventoryItem.purchasePrice;
     // ✅ Create waste record
     const wasteRecord = await Waste.create({
       restaurant: restaurant._id,
-      inventoryItem: inventoryItem ? inventoryItem._id : null,
+      inventoryItem: inventoryItem.itemName ? inventoryItem._id : null,
       itemName: inventoryItem.itemName,
       quantity,
-      unit,
+      price: inventoryItem.purchasePrice,
+      cost,
+      unit: inventoryItem.unit,
       reason,
       description,
     });

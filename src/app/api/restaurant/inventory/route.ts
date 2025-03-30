@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       );
     }
     let newExpiry = new Date();
-    newExpiry.setDate(newExpiry.getDate() + expiryDate);
+    newExpiry.setDate(newExpiry.getDate() + Number(expiryDate));
     const inventory = await Inventory.create({
       restaurant: restaurant._id,
       itemName,

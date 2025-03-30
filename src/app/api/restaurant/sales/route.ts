@@ -152,7 +152,7 @@ export async function GET(req: NextRequest) {
         const payload = await verifyAuth(req);
 
         // Get restaurant by user
-        const restaurant = await Restaurant.findOne({ owner: payload.userId });
+        const restaurant = await Restaurant.findOne({ owner: payload._id });
         if (!restaurant) {
             return NextResponse.json(
                 { error: "Restaurant not found" },
