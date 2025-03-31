@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       isEphemeral,
       ephemeralExpiresAt: isEphemeral ? ephemeralExpiresAt : null,
     });
-
+    console.log(menuItem)
     // Update restaurant's menu array
     await Restaurant.findByIdAndUpdate(restaurant._id, {
       $push: { menu: menuItem._id },

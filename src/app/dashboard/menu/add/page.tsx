@@ -81,7 +81,7 @@ export default function AddMenuItemPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsSubmitting(true)
-
+        console.log(ingredients)
         try {
             const data = await axios.post("/api/restaurant/menu", {
                 ...formData,
