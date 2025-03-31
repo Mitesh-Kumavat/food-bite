@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/config/db";
 import { verifyAuth } from "@/lib/auth";
 import Inventory from "@/models/inventory .model";
-import mongoose from "mongoose";
 import Dish from "@/models/dish.model";
 import Restaurant from "@/models/restaurant.model";
 
@@ -10,7 +9,11 @@ interface InventoryItem {
   unit: string;
   itemName: string;
   quantity: number;
-  expiryDate: Date;
+  expiryDate: string | Date;
+}
+
+interface MenuItem {
+  name: string;
 }
 
 // ✅ **Step 1: Filter Ingredients Expiring Tomorrow (Date Comparison Fixed)**
@@ -32,14 +35,18 @@ function getIngredientsExpiringTomorrow(
   });
 }
 
-// ✅ **Step 2: Call Gemini API and Get Dish Suggestions as Text**
+// ✅ **Step 2: Call Gemini API and Get Dish Suggestions as Text (With Current Menu)**
 async function generateDishSuggestions(
-  ingredientNames: string[]
+  ingredientNames: string[],
+  currentMenu: MenuItem[]
 ): Promise<string | null> {
   const GEMINI_API_KEY = "AIzaSyCbK4lK3XmEPIaGRKo0xTLpRjpG4wED6AE"; // 🔥 Replace with your Gemini 2.0 API Key
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-  // ✅ Refined prompt for text-based output
+  // ✅ Convert current menu names to a comma-separated string
+  const currentMenuNames = currentMenu.map((item) => item.name).join(", ");
+
+  // ✅ Refined prompt to include existing menu and avoid duplicates
   const prompt = `You are a highly skilled chef specializing in creating unique and creative dishes using available ingredients that are about to expire.
 
 🔹 **Task:**
@@ -47,11 +54,11 @@ Generate multiple dish suggestions using some or all of these ingredients that w
 
 🔹 **Output Format:**
 Return the result in plain text format, where each dish follows this pattern:
-dishName: Description; dishName: Description;
+dishName: Description: ingredient: quantity : unit; dishName: Description: ingredient: quantity : unit;
 
 🔹 **Requirements:**
 - Return a string containing at least 5 unique and diverse dish suggestions.
-- Do NOT include any extra text, markdown, or JSON code blocks.
+- Do NOT include any of the following dishes that are already on the menu: ${currentMenuNames}.
 - Each dish should be separated by a semicolon (;) and should follow the exact pattern.
 
 Ingredients available: ${ingredientNames.join(", ")}
@@ -94,28 +101,48 @@ Ingredients available: ${ingredientNames.join(", ")}
   return textResponse;
 }
 
-// ✅ **Step 3: Parse Text Response into JSON**
-function parseDishSuggestions(responseText: string): { dishName: string; description: string }[] {
+// ✅ **Step 3: Parse Text Response into JSON with Ingredients**
+function parseDishSuggestions(responseText: string): {
+  dishName: string;
+  description: string;
+  ingredients: InventoryItem[];
+}[] {
   const dishesArray = responseText.split(";").map((item) => item.trim());
 
   const parsedDishes = dishesArray
     .filter((dish) => dish.includes(":"))
     .map((dish) => {
-      const [dishName, description] = dish.split(":").map((part) => part.trim());
-      return { dishName, description };
+      const parts = dish.split(":").map((part) => part.trim());
+      const dishName = parts[0];
+      const description = parts[1];
+
+      // ✅ Extract ingredients if available
+      const ingredients = [];
+      for (let i = 2; i < parts.length; i += 3) {
+        if (parts[i] && parts[i + 1] && parts[i + 2]) {
+          ingredients.push({
+            itemName: parts[i],
+            quantity: parseInt(parts[i + 1], 10),
+            unit: parts[i + 2],
+            expiryDate: new Date().toISOString(), // Use current date for demo
+          });
+        }
+      }
+
+      return { dishName, description, ingredients };
     });
 
   return parsedDishes;
 }
 
 // ✅ **Step 4: Check if Dishes Already Exist in the Menu**
-async function dishExistsInMenu(generatedDish: string): Promise<boolean> {
-  const menu = [
-    { name: "chole bhature" },
-    { name: "pulao" },
-  ]; // Replace with actual DB call if needed
-
-  return menu.some((dish) => dish.name.toLowerCase() === generatedDish.toLowerCase());
+async function dishExistsInMenu(
+  generatedDish: string,
+  currentMenu: MenuItem[]
+): Promise<boolean> {
+  return currentMenu.some(
+    (dish) => dish.name.toLowerCase() === generatedDish.toLowerCase()
+  );
 }
 
 // ✅ **Route to Generate Temporary Dishes**
@@ -131,6 +158,13 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // ✅ Fetch current menu from DB
+    const currentMenu = await Dish.find({ restaurant: restaurant._id }).select(
+      "name"
+    );
+    console.log(`Current Menu for Restaurant ID: ${restaurant._id}`, currentMenu);
+
+    // ✅ Fetch inventory data
     const inventory = await Inventory.find({ restaurant: restaurant._id });
     const mappedInventory: InventoryItem[] = inventory.map((item: any) => ({
       unit: item.unit,
@@ -150,9 +184,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // ✅ Generate dish suggestions using expiring ingredients
+    // ✅ Generate dish suggestions using expiring ingredients and current menu
     const ingredientNames = expiringIngredients.map((item) => item.itemName);
-    const responseText = await generateDishSuggestions(ingredientNames);
+    const responseText = await generateDishSuggestions(
+      ingredientNames,
+      currentMenu
+    );
 
     if (!responseText) {
       return NextResponse.json(
@@ -170,10 +207,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // ✅ Filter out empty ingredient dishes
+    const filteredDishes = generatedDishes.filter(
+      (dish) => dish.ingredients.length > 0
+    );
+
     // ✅ Filter out existing dishes from the generated ones
     const newDishes = [];
-    for (const dish of generatedDishes) {
-      const dishExists = await dishExistsInMenu(dish.dishName);
+    for (const dish of filteredDishes) {
+      const dishExists = await dishExistsInMenu(dish.dishName, currentMenu);
       if (!dishExists) {
         newDishes.push(dish);
       }
@@ -182,7 +224,10 @@ export async function GET(req: NextRequest) {
     // ✅ Return newly generated dish suggestions
     if (newDishes.length === 0) {
       return NextResponse.json(
-        { message: "All suggested dishes already exist in the menu." },
+        {
+          message:
+            "All suggested dishes already exist in the menu or have no valid ingredients.",
+        },
         { status: 200 }
       );
     }
@@ -194,6 +239,86 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("Error generating temp menu:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    await connectDB();
+    const payload = await verifyAuth(req);
+
+    const { dishes } = await req.json(); // ✅ Expecting an array of dishes
+
+    if (!Array.isArray(dishes) || dishes.length === 0) {
+      return NextResponse.json(
+        { error: "Invalid data format. Expected an array of dishes." },
+        { status: 400 }
+      );
+    }
+
+    // Check if the restaurant exists for the logged-in user
+    const restaurant = await Restaurant.findOne({ owner: payload._id });
+    if (!restaurant) {
+      return NextResponse.json(
+        { error: "Restaurant not found" },
+        { status: 404 }
+      );
+    }
+
+    const dishIds = [];
+
+    // ✅ Loop through each dish and create in the database
+    for (const dish of dishes) {
+      const {
+        name,
+        ingredients,
+        price,
+        category,
+        prepTime,
+        allergens,
+        description,
+        isEphemeral,
+      } = dish;
+
+      let newExpiry = new Date();
+      newExpiry.setDate(newExpiry.getDate() + 1);
+
+      // Create each dish
+      const menuItem = await Dish.create({
+        restaurant: restaurant._id,
+        name,
+        ingredients,
+        price,
+        activeOnMenu: true, // Default to active when added manually
+        category,
+        prepTime,
+        allergens,
+        description,
+        isEphemeral,
+        ephemeralExpiresAt: isEphemeral ? newExpiry : null,
+      });
+
+      dishIds.push(menuItem._id); // ✅ Collect newly added dish IDs
+    }
+
+    // ✅ Update the restaurant's menu array with new dishes
+    await Restaurant.findByIdAndUpdate(restaurant._id, {
+      $push: { menu: { $each: dishIds } },
+    });
+
+    return NextResponse.json(
+      {
+        message: `${dishes.length} dishes added successfully.`,
+        dishIds,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Add multiple dishes error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

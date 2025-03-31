@@ -6,12 +6,14 @@ import DailySale from "@/models/dailysales.model";
 import Dish from "@/models/dish.model";
 import Inventory from "@/models/inventory .model";
 import HistoryDish from "@/models/historyDish.model";
-// Record daily sales
+
+// ✅ **Record Daily Sales (POST Request)**
 export async function POST(req: NextRequest) {
     try {
         await connectDB();
         const payload = await verifyAuth(req);
         const { dishes } = await req.json();
+
         if (!Array.isArray(dishes)) {
             return NextResponse.json(
                 { error: "Invalid data format. Expected an array of dishes." },
@@ -19,7 +21,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Get restaurant by user
+        // ✅ Get restaurant by user
         const restaurant = await Restaurant.findOne({ owner: payload._id });
         if (!restaurant) {
             return NextResponse.json(
@@ -31,7 +33,7 @@ export async function POST(req: NextRequest) {
         let totalSales = 0;
         const dishesWithDetails = [];
 
-        // Calculate total sales and update inventory
+        // ✅ Calculate total sales and update inventory
         for (const dish of dishes) {
             const menuItem = await Dish.findById(dish.dishId);
             if (!menuItem) {
@@ -40,7 +42,7 @@ export async function POST(req: NextRequest) {
                     { status: 404 }
                 );
             }
-
+            console.log(menuItem)
             totalSales += menuItem.price * dish.quantity;
             dishesWithDetails.push({
                 dish: dish.dishId,
@@ -82,11 +84,11 @@ export async function POST(req: NextRequest) {
                 }
             }
 
-            // Update inventory for each ingredient
+            // ✅ Inventory Deduction Logic - FIXED FOR MULTIPLE BATCHES
             for (const ingredient of menuItem.ingredients) {
                 let remainingQuantity = ingredient.quantity * dish.quantity;
 
-                // Find inventory items of the same ingredient, sorted by oldest first
+                // ✅ Find inventory items of the same ingredient, sorted by oldest first
                 const inventoryItems = await Inventory.find({
                     restaurant: restaurant._id,
                     itemName: ingredient.name,
@@ -99,38 +101,41 @@ export async function POST(req: NextRequest) {
                     );
                 }
 
+                // ✅ Loop through inventory and deduct correct quantities
                 for (const inventoryItem of inventoryItems) {
                     if (remainingQuantity <= 0) break;
 
                     if (inventoryItem.quantity <= remainingQuantity) {
                         remainingQuantity -= inventoryItem.quantity;
+                        // ✅ Delete inventory item if fully consumed
                         await Inventory.findByIdAndDelete(inventoryItem._id);
                     } else {
+                        // ✅ Deduct only the required quantity from inventory
                         await Inventory.findByIdAndUpdate(inventoryItem._id, {
-                            $inc: { quantity: -remainingQuantity, usedQuantity: remainingQuantity },
+                            $inc: { quantity: -remainingQuantity },
                         });
                         remainingQuantity = 0;
                     }
                 }
 
-                // Check if inventory deduction was successful
+                // ❗️ Check if inventory deduction was unsuccessful
                 if (remainingQuantity > 0) {
                     return NextResponse.json(
-                        { error: `Insufficient ${ingredient.name} in inventory` },
+                        { error: `Insufficient ${ingredient.name} in inventory to prepare ${menuItem.name}` },
                         { status: 400 }
                     );
                 }
             }
         }
 
-        // Create daily sale record
+        // ✅ Create daily sale record
         const dailySale = await DailySale.create({
             restaurant: restaurant._id,
             dishes: dishesWithDetails,
             totalSales,
         });
 
-        // Update restaurant's dailySales array
+        // ✅ Update restaurant's dailySales array
         await Restaurant.findByIdAndUpdate(restaurant._id, {
             $push: { dailySales: dailySale._id },
         });
@@ -145,13 +150,13 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// Get sales history
+// ✅ **Get Sales History (GET Request)**
 export async function GET(req: NextRequest) {
     try {
         await connectDB();
         const payload = await verifyAuth(req);
 
-        // Get restaurant by user
+        // ✅ Get restaurant by user
         const restaurant = await Restaurant.findOne({ owner: payload._id });
         if (!restaurant) {
             return NextResponse.json(
