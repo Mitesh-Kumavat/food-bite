@@ -124,9 +124,8 @@ export default function WastePage() {
           "Authorization": `Bearer ${localStorage.getItem("token")}`,
         }
       });
-      if (data.status !== 200) {
-        throw new Error("Failed to record waste")
-      }
+      console.log(data, "waste data");
+
       const wasteRecord = {
         _id: `waste-${Date.now()}`,
         date: Date.now(),

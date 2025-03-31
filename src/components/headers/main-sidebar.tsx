@@ -2,19 +2,17 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChefHat, Home, Menu, Package, ShoppingCart, Trash2 } from "lucide-react"
+import { ChefHat, Home, Menu, Package, ShoppingCart, Trash2, Brain } from "lucide-react"
 
 import {
     Sidebar,
     SidebarContent,
-    SidebarFooter,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarRail,
 } from "@/components/ui/sidebar"
-import { useRouter } from "next/navigation"
 
 export function MainSidebar() {
     const pathname = usePathname();
@@ -44,6 +42,11 @@ export function MainSidebar() {
             title: "Waste",
             href: "/dashboard/waste",
             icon: Trash2,
+        },
+        {
+            title: "Ai Menu",
+            href: "/dashboard/ai-menu",
+            icon: Brain,
         },
     ]
 

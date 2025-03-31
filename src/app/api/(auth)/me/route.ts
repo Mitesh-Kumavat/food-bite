@@ -29,7 +29,6 @@ export async function GET(req: NextRequest) {
             restaurantName: restaurantName[0]?.name || null,
         }
         const response = new ApiResponse("User found", 200, finalUser);
-        console.log(response);
 
         return NextResponse.json(response, { status: 200 });
     } catch (error) {

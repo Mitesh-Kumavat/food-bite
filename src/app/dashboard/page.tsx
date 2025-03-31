@@ -41,12 +41,23 @@ export default function HomePage() {
             try {
                 setIsLoading(true)
                 const token = localStorage.getItem("token");
+                const proffit = await axios.post("/api/restaurant/profit-less", {}, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                });
+                console.log(proffit.data, "profit data");
+
                 const data = await axios.get("/api/restaurant/dashboard", {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`
                     },
                 })
+                console.log(data.data);
+
+
                 setData(data.data)
             } catch (error) {
                 console.log(error, "error");
