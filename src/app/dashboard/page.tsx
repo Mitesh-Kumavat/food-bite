@@ -146,28 +146,6 @@ export default function HomePage() {
                                 <InventoryStatusChart data={data ? data.inventoryStatus : []} />
                             </CardContent>
                         </Card>
-                        <Card className="col-span-3">
-                            <CardHeader>
-                                <CardTitle>Alerts</CardTitle>
-                                <CardDescription>Items requiring attention</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    {/* generate dummy data here */}
-                                    {/* {data.alerts.map((alert, i) => (
-                                        <div key={i} className="flex items-start gap-4 rounded-md border p-4">
-                                            <AlertTriangle
-                                                className={`mt-0.5 h-5 w-5 ${alert.type === "warning" ? "text-amber-500" : "text-red-500"}`}
-                                            />
-                                            <div className="flex-1 space-y-1">
-                                                <p className="text-sm font-medium leading-none">{alert.title}</p>
-                                                <p className="text-sm text-muted-foreground">{alert.description}</p>
-                                            </div>
-                                        </div>
-                                    ))} */}
-                                </div>
-                            </CardContent>
-                        </Card>
                     </div>
                 </div>
             )}
