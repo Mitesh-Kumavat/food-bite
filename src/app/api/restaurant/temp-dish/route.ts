@@ -16,8 +16,6 @@ interface MenuItem {
   name: string;
 }
 
-// ✅ *Step 1: Filter Ingredients Expiring Tomorrow (Date Comparison Fixed)*
-// ✅ *Step 1: Filter Ingredients Expiring in 2 Days (Updated Date Comparison)*
 function getIngredientsExpiringSoon(inventory: InventoryItem[]): InventoryItem[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -26,28 +24,23 @@ function getIngredientsExpiringSoon(inventory: InventoryItem[]): InventoryItem[]
     const expiryDate = new Date(item.expiryDate);
     expiryDate.setHours(0, 0, 0, 0);
 
-    // ✅ Check if the date difference is exactly 1 or 2 days
     const timeDiff = expiryDate.getTime() - today.getTime();
     const dayDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 
-    // ✅ Updated: Check for both 1 day and 2 days difference
     return dayDiff === 1 || dayDiff === 2;
   });
 }
 
 
-// ✅ *Step 2: Call Gemini API and Get Dish Suggestions as Text (With Current Menu)*
 async function generateDishSuggestions(
   ingredientNames: string[],
   currentMenu: MenuItem[]
 ): Promise<string | null> {
-  const GEMINI_API_KEY = "AIzaSyCbK4lK3XmEPIaGRKo0xTLpRjpG4wED6AE"; // 🔥 Replace with your Gemini 2.0 API Key
+  const GEMINI_API_KEY = "AIzaSyCbK4lK3XmEPIaGRKo0xTLpRjpG4wED6AE"; 
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-  // ✅ Convert current menu names to a comma-separated string
   const currentMenuNames = currentMenu.map((item) => item.name).join(", ");
 
-  // ✅ Refined prompt to include existing menu and avoid duplicates
   const prompt = `You are a highly skilled chef specializing in creating unique and creative dishes using available ingredients that are about to expire.
 
 🔹 *Task:*
@@ -91,7 +84,6 @@ Ingredients available: ${ingredientNames.join(", ")}
   const data = await response.json();
   console.log("AI Response:", data);
 
-  // ✅ Extract the text-based response
   const textResponse = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
   if (!textResponse) {
     console.error("Invalid response from Gemini API.");
@@ -102,7 +94,6 @@ Ingredients available: ${ingredientNames.join(", ")}
   return textResponse;
 }
 
-// ✅ *Step 3: Parse Text Response into JSON with Ingredients*
 function parseDishSuggestions(responseText: string): {
   dishName: string;
   description: string;
@@ -117,7 +108,6 @@ function parseDishSuggestions(responseText: string): {
       const dishName = parts[0];
       const description = parts[1];
 
-      // ✅ Extract ingredients if available
       const ingredients = [];
       for (let i = 2; i < parts.length; i += 3) {
         if (parts[i] && parts[i + 1] && parts[i + 2]) {
@@ -125,7 +115,7 @@ function parseDishSuggestions(responseText: string): {
             itemName: parts[i],
             quantity: parseInt(parts[i + 1], 10),
             unit: parts[i + 2],
-            expiryDate: new Date().toISOString(), // Use current date for demo
+            expiryDate: new Date().toISOString(), 
           });
         }
       }
@@ -136,7 +126,6 @@ function parseDishSuggestions(responseText: string): {
   return parsedDishes;
 }
 
-// ✅ *Step 4: Check if Dishes Already Exist in the Menu*
 async function dishExistsInMenu(
   generatedDish: string,
   currentMenu: MenuItem[]
@@ -146,7 +135,6 @@ async function dishExistsInMenu(
   );
 }
 
-// ✅ *Route to Generate Temporary Dishes*
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
@@ -159,13 +147,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // ✅ Fetch current menu from DB
     const currentMenu = await Dish.find({ restaurant: restaurant._id }).select(
       "name"
     );
     console.log(`Current Menu for Restaurant ID: ${restaurant._id}`, currentMenu);
 
-    // ✅ Fetch inventory data
     const inventory = await Inventory.find({ restaurant: restaurant._id });
     const mappedInventory: InventoryItem[] = inventory.map((item: any) => ({
       unit: item.unit,
@@ -176,7 +162,6 @@ export async function GET(req: NextRequest) {
 
     console.log(`Inventory for Restaurant ID: ${payload._id}`, mappedInventory);
 
-    // ✅ Get all ingredients that will expire tomorrow
     const expiringIngredients = getIngredientsExpiringSoon(mappedInventory);
     if (expiringIngredients.length === 0) {
       return NextResponse.json(
@@ -185,7 +170,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // ✅ Generate dish suggestions using expiring ingredients and current menu
     const ingredientNames = expiringIngredients.map((item) => item.itemName);
     const responseText = await generateDishSuggestions(
       ingredientNames,
@@ -199,7 +183,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // ✅ Parse generated text into JSON format
     const generatedDishes = parseDishSuggestions(responseText);
     if (generatedDishes.length === 0) {
       return NextResponse.json(
@@ -208,12 +191,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // ✅ Filter out empty ingredient dishes
     const filteredDishes = generatedDishes.filter(
       (dish) => dish.ingredients.length > 0
     );
 
-    // ✅ Filter out existing dishes from the generated ones
     const newDishes = [];
     for (const dish of filteredDishes) {
       const dishExists = await dishExistsInMenu(dish.dishName, currentMenu);
@@ -222,7 +203,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // ✅ Return newly generated dish suggestions
     if (newDishes.length === 0) {
       return NextResponse.json(
         {
@@ -252,7 +232,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const payload = await verifyAuth(req);
 
-    const { dishes } = await req.json(); // ✅ Expecting an array of dishes
+    const { dishes } = await req.json(); 
 
     if (!Array.isArray(dishes) || dishes.length === 0) {
       return NextResponse.json(
@@ -261,7 +241,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if the restaurant exists for the logged-in user
     const restaurant = await Restaurant.findOne({ owner: payload._id });
     if (!restaurant) {
       return NextResponse.json(
@@ -272,7 +251,6 @@ export async function POST(req: NextRequest) {
 
     const dishIds = [];
 
-    // ✅ Loop through each dish and create in the database
     for (const dish of dishes) {
       const {
         name,
