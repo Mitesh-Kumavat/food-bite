@@ -35,18 +35,15 @@ function getIngredientsExpiringTomorrow(
   });
 }
 
-// ✅ **Step 2: Call Gemini API and Get Dish Suggestions as Text (With Current Menu)**
 async function generateDishSuggestions(
   ingredientNames: string[],
   currentMenu: MenuItem[]
 ): Promise<string | null> {
-  const GEMINI_API_KEY = "AIzaSyCbK4lK3XmEPIaGRKo0xTLpRjpG4wED6AE"; // 🔥 Replace with your Gemini 2.0 API Key
+  const GEMINI_API_KEY = "AIzaSyCbK4lK3XmEPIaGRKo0xTLpRjpG4wED6AE";
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-  // ✅ Convert current menu names to a comma-separated string
   const currentMenuNames = currentMenu.map((item) => item.name).join(", ");
 
-  // ✅ Refined prompt to include existing menu and avoid duplicates
   const prompt = `You are a highly skilled chef specializing in creating unique and creative dishes using available ingredients that are about to expire.
 
 🔹 **Task:**
@@ -55,6 +52,7 @@ Generate multiple dish suggestions using some or all of these ingredients that w
 🔹 **Output Format:**
 Return the result in plain text format, where each dish follows this pattern:
 dishName: Description: ingredient: quantity : unit; dishName: Description: ingredient: quantity : unit;
+Units can be grams, kg, liters,ml, pieces, boxes, and bottle only no other than that so give the unit from the given only. The quantity should be a number. The description should be  giving information about the dish.
 
 🔹 **Requirements:**
 - Return a string containing at least 5 unique and diverse dish suggestions.
