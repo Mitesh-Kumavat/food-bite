@@ -36,7 +36,7 @@ async function generateDishSuggestions(
   ingredientNames: string[],
   currentMenu: MenuItem[]
 ): Promise<string | null> {
-  const GEMINI_API_KEY = "AIzaSyCbK4lK3XmEPIaGRKo0xTLpRjpG4wED6AE"; 
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
   const currentMenuNames = currentMenu.map((item) => item.name).join(", ");
@@ -115,7 +115,7 @@ function parseDishSuggestions(responseText: string): {
             itemName: parts[i],
             quantity: parseInt(parts[i + 1], 10),
             unit: parts[i + 2],
-            expiryDate: new Date().toISOString(), 
+            expiryDate: new Date().toISOString(),
           });
         }
       }
@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const payload = await verifyAuth(req);
 
-    const { dishes } = await req.json(); 
+    const { dishes } = await req.json();
 
     if (!Array.isArray(dishes) || dishes.length === 0) {
       return NextResponse.json(
