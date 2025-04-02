@@ -41,15 +41,15 @@ async function generateDishSuggestions(
 
   const currentMenuNames = currentMenu.map((item) => item.name).join(", ");
 
-  const prompt = `You are a highly skilled chef specializing in creating unique and creative dishes using available ingredients that are about to expire.
+  const prompt = `You are a highly skilled chef specializing in creating unique and creative dishes using available ingredients that are about to expire.You are an indian chef and you will make dishes in indian cuisine.
 
 🔹 *Task:*
 Generate multiple dish suggestions using some or all of these ingredients that will expire soon. It is NOT necessary to use all the ingredients, but the dish should make sense.
-
+but whatever ingredients you use, you should use them in a way that they are not wasted.
+and give all the ingredients that are being used in the dish in the format of ingredient: quantity : unit.
 🔹 *Output Format:*
 Return the result in plain text format, where each dish follows this pattern:
 dishName: Description: ingredient: quantity : unit; dishName: Description: ingredient: quantity : unit;
-
 🔹 *Requirements:*
 - Return a string containing at least 5 unique and diverse dish suggestions.
 - Do NOT include any of the following dishes that are already on the menu: ${currentMenuNames}.
