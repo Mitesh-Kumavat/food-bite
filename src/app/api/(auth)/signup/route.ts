@@ -37,8 +37,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const newUser = new User({ email, userName, password });
         const owner = newUser._id;
         const newRestaurant = new Restaurant({name:restaurantName, address:restaurantAddress, owner});
-        newUser.save();
-        newRestaurant.save();
+        await newUser.save();
+        await newRestaurant.save();
 
         const response = new ApiResponse("User created successfully", 201, newUser);
         return NextResponse.json(response, { status: 201 });
